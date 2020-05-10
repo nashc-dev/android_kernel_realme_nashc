@@ -446,6 +446,7 @@ struct usb_gadget_ops {
  *	indicates that it supports LPM as per the LPM ECN & errata.
  * @remote_wakeup: Indicates if the host has enabled the remote_wakeup
  * feature.
+ * @irq: the interrupt number for device controller.
  *
  * Gadgets have a mostly-portable "gadget driver" implementing device
  * functions, handling all usb configurations and interfaces.  Gadget
@@ -501,6 +502,7 @@ struct usb_gadget {
 	unsigned			connected:1;
 	unsigned			lpm_capable:1;
 	unsigned			remote_wakeup:1;
+	int				irq;
 
 	ANDROID_KABI_RESERVE(1);
 	ANDROID_KABI_RESERVE(2);
