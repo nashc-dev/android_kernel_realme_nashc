@@ -9,6 +9,8 @@
 
 #include <linux/debugfs.h>
 
+struct ssusb_mtk;
+
 #define MTU3_DEBUGFS_NAME_LEN 32
 
 struct mtu3_regset {
