@@ -1301,6 +1301,7 @@ int usb_add_gadget_udc_release(struct device *parent, struct usb_gadget *gadget,
 	return 0;
 
  err_del_udc:
+	flush_work(&gadget->work);
 	device_del(&udc->dev);
 
  err_unlist_udc:
