@@ -207,39 +207,12 @@ static void mtu3_intr_enable(struct mtu3 *mtu)
 }
 
 
-static void mtu3_set_speed(struct mtu3 *mtu)
+static void mtu3_set_speed(struct mtu3 *mtu);
+
+/* CSR registers will be reset to default value if port is disabled */
+static void mtu3_csr_init(struct mtu3 *mtu)
 {
 	void __iomem *mbase = mtu->mac_base;
-
-	if (!mtu->is_u3_ip && (mtu->max_speed > USB_SPEED_HIGH))
-		mtu->max_speed = USB_SPEED_HIGH;
-
-	if (mtu->max_speed == USB_SPEED_FULL) {
-		/* disable U3 SS function */
-		mtu3_clrbits(mbase, U3D_USB3_CONFIG, USB3_EN);
-		/* disable HS function */
-		mtu3_clrbits(mbase, U3D_POWER_MANAGEMENT, HS_ENABLE);
-	} else if (mtu->max_speed == USB_SPEED_HIGH) {
-		mtu3_clrbits(mbase, U3D_USB3_CONFIG, USB3_EN);
-		/* HS/FS detected by HW */
-		mtu3_setbits(mbase, U3D_POWER_MANAGEMENT, HS_ENABLE);
-	} else if (mtu->max_speed == USB_SPEED_SUPER) {
-		mtu3_clrbits(mtu->ippc_base, SSUSB_U3_CTRL(0),
-			     SSUSB_U3_PORT_SSP_SPEED);
-	}
-
-	dev_info(mtu->dev, "max_speed: %s\n",
-		usb_speed_string(mtu->max_speed));
-}
-
-static void mtu3_regs_init(struct mtu3 *mtu)
-{
-
-	void __iomem *mbase = mtu->mac_base;
-
-	/* be sure interrupts are disabled before registration of ISR */
-	mtu3_intr_disable(mtu);
-	mtu3_intr_status_clear(mtu);
 
 	if (mtu->is_u3_ip) {
 		/* disable LGO_U1/U2 by default */
@@ -268,19 +241,8 @@ static void mtu3_regs_init(struct mtu3 *mtu)
 
 	/* delay about 0.1us from detecting reset to send chirp-K */
 	mtu3_clrbits(mbase, U3D_LINK_RESET_INFO, WTCHRP_MSK);
-	/* U2/U3 detected by HW */
-	mtu3_writel(mbase, U3D_DEVICE_CONF, 0);
-	/* vbus detected by HW */
-	mtu3_clrbits(mbase, U3D_MISC_CTRL, VBUS_FRC_EN | VBUS_ON);
 	/* enable automatical HWRW from L1 */
 	mtu3_setbits(mbase, U3D_POWER_MANAGEMENT, LPM_HRWE);
-	mtu3_writel(mbase, U3D_USB2_EPCTL_LPM, L1_EXIT_EP0_CHK);
-	mtu3_writel(mbase, U3D_USB2_EPCTL_LPM_FC_CHK, 0);
-
-	ssusb_set_force_vbus(mtu->ssusb, true);
-	/* use new QMU format when HW version >= 0x1003 */
-	if (mtu->gen2cp)
-		mtu3_writel(mbase, U3D_QFCR, ~0x0);
 }
 
 /* reset: u2 - data toggle, u3 - SeqN, flow control status etc */
@@ -355,15 +317,7 @@ void mtu3_start(struct mtu3 *mtu)
 
 	mtu3_clrbits(mtu->ippc_base, U3D_SSUSB_IP_PW_CTRL2, SSUSB_IP_DEV_PDN);
 
-	mtu3_regs_init(mtu);
-
-	/*
-	 * When disable U2 port, USB2_CSR's register will be reset to
-	 * default value after re-enable it again(HS is enabled by default).
-	 * So if force mac to work as FS, disable HS function.
-	 */
-	if (mtu->max_speed == USB_SPEED_FULL)
-		mtu3_clrbits(mbase, U3D_POWER_MANAGEMENT, HS_ENABLE);
+	mtu3_csr_init(mtu);
 
 	/* Initialize the default interrupts */
 	mtu3_intr_enable(mtu);
@@ -643,6 +597,54 @@ static void mtu3_mem_free(struct mtu3 *mtu)
 {
 	mtu3_qmu_exit(mtu);
 	kfree(mtu->ep_array);
+}
+
+static void mtu3_set_speed(struct mtu3 *mtu)
+{
+	void __iomem *mbase = mtu->mac_base;
+
+	if (!mtu->is_u3_ip && (mtu->max_speed > USB_SPEED_HIGH))
+		mtu->max_speed = USB_SPEED_HIGH;
+
+	if (mtu->max_speed == USB_SPEED_FULL) {
+		/* disable U3 SS function */
+		mtu3_clrbits(mbase, U3D_USB3_CONFIG, USB3_EN);
+		/* disable HS function */
+		mtu3_clrbits(mbase, U3D_POWER_MANAGEMENT, HS_ENABLE);
+	} else if (mtu->max_speed == USB_SPEED_HIGH) {
+		mtu3_clrbits(mbase, U3D_USB3_CONFIG, USB3_EN);
+		/* HS/FS detected by HW */
+		mtu3_setbits(mbase, U3D_POWER_MANAGEMENT, HS_ENABLE);
+	} else if (mtu->max_speed == USB_SPEED_SUPER) {
+		mtu3_clrbits(mtu->ippc_base, SSUSB_U3_CTRL(0),
+			     SSUSB_U3_PORT_SSP_SPEED);
+	}
+
+	dev_info(mtu->dev, "max_speed: %s\n",
+		usb_speed_string(mtu->max_speed));
+}
+
+static void mtu3_regs_init(struct mtu3 *mtu)
+{
+	void __iomem *mbase = mtu->mac_base;
+
+	/* be sure interrupts are disabled before registration of ISR */
+	mtu3_intr_disable(mtu);
+	mtu3_intr_status_clear(mtu);
+
+	mtu3_csr_init(mtu);
+
+	/* U2/U3 detected by HW */
+	mtu3_writel(mbase, U3D_DEVICE_CONF, 0);
+	/* vbus detected by HW */
+	mtu3_clrbits(mbase, U3D_MISC_CTRL, VBUS_FRC_EN | VBUS_ON);
+	mtu3_writel(mbase, U3D_USB2_EPCTL_LPM, L1_EXIT_EP0_CHK);
+	mtu3_writel(mbase, U3D_USB2_EPCTL_LPM_FC_CHK, 0);
+
+	ssusb_set_force_vbus(mtu->ssusb, true);
+	/* use new QMU format when HW version >= 0x1003 */
+	if (mtu->gen2cp)
+		mtu3_writel(mbase, U3D_QFCR, ~0x0);
 }
 
 static irqreturn_t mtu3_link_isr(struct mtu3 *mtu)
