@@ -98,7 +98,6 @@
 #include <linux/delay.h>
 #include <linux/log2.h>
 #include <linux/pm_qos.h>
-
 #include <mali_kbase_config.h>
 
 
