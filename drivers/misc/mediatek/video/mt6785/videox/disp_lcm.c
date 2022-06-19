@@ -1963,7 +1963,6 @@ int disp_lcm_get_hbm_state(struct disp_lcm_handle *plcm)
 		return -1;
 	}
 
-		DISP_PR_INFO("plcm->drv->get_hbm_state\n");
 	return plcm->drv->get_hbm_state();
 }
 
