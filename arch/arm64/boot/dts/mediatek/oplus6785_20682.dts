@@ -23,5 +23,5 @@
 #include "mediatek/oplus6785/20682/oplus6785_20682_charger.dtsi"
 
 #include "mediatek/cust_mt6785_camera_20682.dtsi"
-#include <oplus6785_20682/cust.dtsi>
+#include "mediatek/oplus6785/20682/cust.dtsi"
 /*End of this file, DO NOT ADD ANYTHING HERE*/
