@@ -163,6 +163,9 @@ static const struct vm_operations_struct f2fs_file_vm_ops = {
 	.fault		= f2fs_filemap_fault,
 	.map_pages	= filemap_map_pages,
 	.page_mkwrite	= f2fs_vm_page_mkwrite,
+#ifdef CONFIG_SPECULATIVE_PAGE_FAULT
+	.suitable_for_spf = true,
+#endif
 };
 
 static int get_parent_ino(struct inode *inode, nid_t *pino)
@@ -3878,6 +3881,12 @@ static ssize_t f2fs_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 			if (!f2fs_force_buffered_io(inode, iocb, from) &&
 					allow_outplace_dio(inode, iocb, from))
 				goto write;
+
+#ifdef CONFIG_HYBRIDSWAP_CORE
+			if (f2fs_overwrite_io(inode, iocb->ki_pos,
+						iov_iter_count(from)))
+				goto write;
+#endif
 		}
 		preallocated = true;
 		target_size = iocb->ki_pos + iov_iter_count(from);

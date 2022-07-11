@@ -896,8 +896,15 @@ block_t f2fs_get_unusable_blocks(struct f2fs_sb_info *sbi)
 	mutex_unlock(&dirty_i->seglist_lock);
 
 	unusable = holes[DATA] > holes[NODE] ? holes[DATA] : holes[NODE];
-	if (unusable > ovp_holes)
+	if (unusable > ovp_holes) {
+		if (unusable - ovp_holes > sbi->user_block_count) {
+			f2fs_info(sbi, "ovp_holes:%u,unusable:%u,userblkcnt:%u",
+				ovp_holes, unusable, sbi->user_block_count);
+			f2fs_bug_on(sbi, 1);
+			return sbi->user_block_count;
+		}
 		return unusable - ovp_holes;
+	}
 	return 0;
 }
 
@@ -905,11 +912,19 @@ int f2fs_disable_cp_again(struct f2fs_sb_info *sbi, block_t unusable)
 {
 	int ovp_hole_segs =
 		(overprovision_segments(sbi) - reserved_segments(sbi));
-	if (unusable > F2FS_OPTION(sbi).unusable_cap)
+	if (unusable > F2FS_OPTION(sbi).unusable_cap) {
+		f2fs_err(sbi, " f2fs_disable_cp_again unusable > F2FS_OPTION(sbi).unusable_cap unusable:%d, F2FS_OPTION(sbi).unusable_cap:%u",
+				 unusable, F2FS_OPTION(sbi).unusable_cap);
+		f2fs_bug_on(sbi, 1);
 		return -EAGAIN;
+	}
 	if (is_sbi_flag_set(sbi, SBI_CP_DISABLED_QUICK) &&
-		dirty_segments(sbi) > ovp_hole_segs)
+		dirty_segments(sbi) > ovp_hole_segs) {
+		f2fs_err(sbi, " f2fs_disable_cp_again dirty_segments(sbi) > ovp_hole_segs :dirty_segments(sbi):%llu ovp_hole_segs:%d",
+				dirty_segments(sbi), ovp_hole_segs);
+		f2fs_bug_on(sbi, 1);
 		return -EAGAIN;
+		}
 	return 0;
 }
 
@@ -2317,7 +2332,9 @@ int f2fs_npages_for_summary_flush(struct f2fs_sb_info *sbi, bool for_ra)
  */
 struct page *f2fs_get_sum_page(struct f2fs_sb_info *sbi, unsigned int segno)
 {
-	return f2fs_get_meta_page_nofail(sbi, GET_SUM_BLOCK(sbi, segno));
+	if (unlikely(f2fs_cp_error(sbi)))
+		return ERR_PTR(-EIO);
+	return f2fs_get_meta_page_retry(sbi, GET_SUM_BLOCK(sbi, segno));
 }
 
 void f2fs_update_meta_page(struct f2fs_sb_info *sbi,
@@ -2589,7 +2606,11 @@ static void change_curseg(struct f2fs_sb_info *sbi, int type)
 	__next_free_blkoff(sbi, curseg, 0);
 
 	sum_page = f2fs_get_sum_page(sbi, new_segno);
-	f2fs_bug_on(sbi, IS_ERR(sum_page));
+	if (IS_ERR(sum_page)) {
+		/* GC won't be able to use stale summary pages by cp_error */
+		memset(curseg->sum_blk, 0, SUM_ENTRY_SIZE);
+		return;
+	}
 	sum_node = (struct f2fs_summary_block *)page_address(sum_page);
 	memcpy(curseg->sum_blk, sum_node, SUM_ENTRY_SIZE);
 	f2fs_put_page(sum_page, 1);
@@ -3106,14 +3127,6 @@ void f2fs_allocate_data_block(struct f2fs_sb_info *sbi, struct page *page,
 		type = CURSEG_COLD_DATA;
 	}
 
-	/*
-	 * We need to wait for node_write to avoid block allocation during
-	 * checkpoint. This can only happen to quota writes which can cause
-	 * the below discard race condition.
-	 */
-	if (IS_DATASEG(type))
-		down_write(&sbi->node_write);
-
 	down_read(&SM_I(sbi)->curseg_lock);
 
 	mutex_lock(&curseg->curseg_mutex);
@@ -3178,9 +3191,6 @@ void f2fs_allocate_data_block(struct f2fs_sb_info *sbi, struct page *page,
 	mutex_unlock(&curseg->curseg_mutex);
 
 	up_read(&SM_I(sbi)->curseg_lock);
-
-	if (IS_DATASEG(type))
-		up_write(&sbi->node_write);
 
 	if (put_pin_sem)
 		up_read(&sbi->pin_sem);
@@ -3758,7 +3768,7 @@ int f2fs_lookup_journal_in_cursum(struct f2fs_journal *journal, int type,
 static struct page *get_current_sit_page(struct f2fs_sb_info *sbi,
 					unsigned int segno)
 {
-	return f2fs_get_meta_page_nofail(sbi, current_sit_addr(sbi, segno));
+	return f2fs_get_meta_page(sbi, current_sit_addr(sbi, segno));
 }
 
 static struct page *get_next_sit_page(struct f2fs_sb_info *sbi,
