@@ -80,6 +80,9 @@ endif
 # Bluetooth
 obj-$(CONFIG_MTK_COMBO_BT) += bt/mt66xx/wmt/
 
+# FMRadio
+obj-$(CONFIG_MTK_FMRADIO) += fmradio/
+
 # Otherwise we were called directly from the command line;
 # invoke the kernel build system.
 else
