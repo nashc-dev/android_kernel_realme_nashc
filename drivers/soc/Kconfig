@@ -18,10 +18,6 @@ source "drivers/soc/ux500/Kconfig"
 source "drivers/soc/versatile/Kconfig"
 source "drivers/soc/zte/Kconfig"
 
-#ifdef OPLUS_FEATURE_LOWMEM_DBG
-source "drivers/soc/oplus/lowmem_dbg/Kconfig"
-##endif /* OPLUS_FEATURE_LOWMEM_DBG */
-
 #ifdef OPLUS_FEATURE_MEMLEAK_DETECT
 #Add for svelte
 source "drivers/soc/oplus/svelte/Kconfig"

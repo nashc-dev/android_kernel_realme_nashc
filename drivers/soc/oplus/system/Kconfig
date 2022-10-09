@@ -56,10 +56,6 @@ source "drivers/soc/oplus/system/full_aging/Kconfig"
 source "drivers/soc/oplus/system/qcom_pmicwd/Kconfig"
 #endif /* OPLUS_FEATURE_QCOM_PMICWD */
 
-#ifdef OPLUS_FEATURE_MM_OSVELTE
-source "drivers/soc/oplus/system/mm_osvelte/Kconfig"
-#endif /* OPLUS_FEATURE_MM_OSVELTE */
-
 #ifdef OPLUS_FEATURE_DUMP_REASON
 #terry.zhong@optimization.Stability, 2020/11/30, Add for dump reason
 source "drivers/soc/oplus/system/dump_reason/Kconfig"
