@@ -107,13 +107,6 @@
 #include <linux/healthinfo/jank_monitor.h>
 #endif /* OPLUS_FEATURE_HEALTHINFO */
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-#define GLOBAL_SYSTEM_UID KUIDT_INIT(1000)
-#define GLOBAL_SYSTEM_GID KGIDT_INIT(1000)
-extern const struct file_operations proc_ux_state_operations;
-extern bool is_special_entry(struct dentry *dentry, const char* special_proc);
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-
 #ifdef OPLUS_BUG_STABILITY
 extern size_t get_ion_heap_by_pid(pid_t pid);
 extern int get_gl_mem_by_pid(pid_t pid);
@@ -1942,12 +1935,6 @@ int pid_revalidate(struct dentry *dentry, unsigned int flags)
 
 	if (task) {
 		task_dump_owner(task, inode->i_mode, &inode->i_uid, &inode->i_gid);
-#ifdef OPLUS_FEATURE_USCHED_ASSIST
-		if (is_special_entry(dentry, "ux_state")) {
-			inode->i_uid = GLOBAL_SYSTEM_UID;
-			inode->i_gid = GLOBAL_SYSTEM_GID;
-		}
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 		inode->i_mode &= ~(S_ISUID | S_ISGID);
 		security_task_to_inode(task, inode);
 		put_task_struct(task);
@@ -3596,10 +3583,6 @@ static const struct pid_entry tid_base_stuff[] = {
 #ifdef CONFIG_MTK_TASK_TURBO
 	ONE("turbo", 0444, proc_turbo_task_show),
 #endif
-
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	REG("ux_state", S_IRUGO | S_IWUGO, proc_ux_state_operations),
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 
 #ifdef OPLUS_BUG_STABILITY
 	REG("real_phymemory",   S_IRUGO, proc_pid_real_phymemory_ops),

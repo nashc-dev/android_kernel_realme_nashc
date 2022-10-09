@@ -28,14 +28,6 @@
 #define BUFFER_SIZE_M 512
 #define BUFFER_SIZE_L 1024
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-extern bool test_task_ux(struct task_struct *task);
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
-extern int sysctl_uxchain_v2;
-extern u64 sysctl_mmapsem_uninterruptable_time;
-#endif
-#endif
-
 struct sched_stat_para sched_para[OHM_SCHED_TOTAL];
 static char *sched_list[OHM_TYPE_TOTAL] = {
 	"iowait",
@@ -192,12 +184,6 @@ void ohm_schedstats_record(int sched_type, struct task_struct *task,
 				ohm_action_trig(sched_type);
 		}
 	}
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	if (test_task_ux(task)) {
-		ohm_sched_stat_record_common(sched_stat, &sched_stat->ux,
-					     delta_ms);
-	}
-#endif
 	return;
 }
 

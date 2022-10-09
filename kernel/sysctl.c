@@ -130,12 +130,6 @@ extern int sysctl_nr_trim_pages;
 static int sixty = 60;
 #endif
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-int sysctl_uxchain_v2 = 0;
-u64 sysctl_mmapsem_uninterruptable_time;
-#endif
-
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 extern sysctl_sched_impt_tgid;
 #endif
@@ -371,21 +365,10 @@ static int max_sched_tunable_scaling = SCHED_TUNABLESCALING_END-1;
 #endif /* CONFIG_SCHED_DEBUG */
 
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-int sysctl_sched_assist_enabled = 1;
-int sysctl_sched_assist_scene = 0;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-
 
 #ifdef CONFIG_COMPACTION
 static int min_extfrag_threshold;
 static int max_extfrag_threshold = 1000;
-#endif
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_SCHED_WALT)
-extern int sysctl_slide_boost_enabled;
-extern int sysctl_boost_task_threshold;
-extern int sysctl_frame_rate;
-extern int sched_frame_rate_handler(struct ctl_table *table, int write, void __user *buffer, size_t *lenp, loff_t *ppos);
 #endif
 static struct ctl_table kern_table[] = {
 
@@ -1486,76 +1469,6 @@ static struct ctl_table kern_table[] = {
 		.extra2		= &one,
 	},
 #endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_CTP) */
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	{
-		.procname	= "sched_assist_enabled",
-		.data		= &sysctl_sched_assist_enabled,
-		.maxlen		= sizeof(int),
-		.mode		= 0666,
-		.proc_handler	= proc_dointvec,
-	},
-	{
-		.procname	= "sched_assist_scene",
-		.data		= &sysctl_sched_assist_scene,
-		.maxlen		= sizeof(int),
-		.mode		= 0666,
-		.proc_handler	= sysctl_sched_assist_scene_handler,
-	},
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_SCHED_WALT)
-	{
-		.procname	= "slide_boost_enabled",
-		.data		= &sysctl_slide_boost_enabled,
-		.maxlen 	= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-	{
-		.procname	= "boost_task_threshold",
-		.data		= &sysctl_boost_task_threshold,
-		.maxlen 	= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-	{
-		.procname	= "animation_type",
-		.data		= &sysctl_animation_type,
-		.maxlen		= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-	{
-		.procname	= "frame_rate",
-		.data		= &sysctl_frame_rate,
-		.maxlen 	= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = sched_frame_rate_handler,
-	},
-	{
-		.procname	= "input_boost_enabled",
-		.data		= &sysctl_input_boost_enabled,
-		.maxlen 	= sizeof(int),
-		.mode		= 0666,
-		.proc_handler = sysctl_sched_assist_input_boost_ctrl_handler,
-	},
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	{
-		.procname	= "uxchain_v2",
-		.data		= &sysctl_uxchain_v2,
-		.maxlen = sizeof(int),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-	{
-		.procname	= "mmapsem_uninterruptable_time",
-		.data		= &sysctl_mmapsem_uninterruptable_time,
-		.maxlen = sizeof(u64),
-		.mode		= 0666,
-		.proc_handler = proc_dointvec,
-	},
-#endif
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 	{
 		.procname	= "sched_impt_tgid",

@@ -209,17 +209,6 @@ struct task_group;
 
 #endif
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-extern int sysctl_sched_assist_enabled;
-extern int sysctl_sched_assist_scene;
-extern int sysctl_animation_type;
-
-
-extern int sysctl_slide_boost_enabled;
-extern int sysctl_boost_task_threshold;
-extern int sysctl_input_boost_enabled;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-
 #ifdef CONFIG_OPLUS_PREFER_SILVER
 extern int sysctl_prefer_silver;
 #endif /* CONFIG_OPLUS_PREFER_SILVER */
@@ -841,10 +830,6 @@ struct task_struct {
 	u64 last_sleep_ts;
 #endif
 	u64 last_enqueued_ts;
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_SCHED_WALT)
-	u64 last_wake_ts;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-
 #ifdef CONFIG_CGROUP_SCHED
 	struct task_group		*sched_task_group;
 #endif
@@ -1404,22 +1389,6 @@ struct task_struct {
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 	struct task_info oplus_task_info;
 #endif
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	int ux_state;
-	atomic64_t inherit_ux;
-	struct list_head ux_entry;
-	int ux_depth;
-	u64 enqueue_time;
-	u64 inherit_ux_start;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-       int ux_once;
-       u64 get_mmlock_ts;
-       int get_mmlock;
-#endif
-
 #ifdef CONFIG_MEMCG
 	struct mem_cgroup		*memcg_in_oom;
 	gfp_t				memcg_oom_gfp_mask;
@@ -1904,9 +1873,6 @@ static inline void kick_process(struct task_struct *tsk) { }
 extern pid_t alloc_svc_tgid;
 #endif /* CONFIG_OPLUS_ION_BOOSTPOOL */
 extern void __set_task_comm(struct task_struct *tsk, const char *from, bool exec);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-extern void sched_assist_target_comm(struct task_struct *task);
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 #if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
 extern void get_target_thread_pid(struct task_struct *p);
 #endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */

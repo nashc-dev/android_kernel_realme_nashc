@@ -106,9 +106,6 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-#include <linux/sched_assist/sched_assist_fork.h>
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 #include <mt-plat/mtk_pidmap.h>
 #ifdef CONFIG_MTK_TASK_TURBO
 #include <mt-plat/turbo_common.h>
@@ -1937,9 +1934,6 @@ static __latent_entropy struct task_struct *copy_process(
 #ifdef CONFIG_MTK_TASK_TURBO
 	init_turbo_attr(p, current);
 #endif
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	init_task_ux_info(p);
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 #if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
 	p->jank_trace = 0;
 	memset(&p->jank_info, 0, sizeof(struct jank_monitor_info));

@@ -16,15 +16,8 @@ int sysctl_heavy_task_thresh = 50;
 int sysctl_cpu_util_thresh = 85;
 int sysctl_silver_trigger_freq = 1503000;
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-extern bool test_task_ux(struct task_struct *task);
-#endif
-
 bool prefer_silver_check_ux(struct task_struct *task) {
 	bool is_ux = false;
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	is_ux = test_task_ux(current);
-#endif
 	return is_ux;
 }
 
