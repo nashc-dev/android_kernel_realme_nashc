@@ -46,9 +46,6 @@ static int fg_uids_open(struct inode *inode, struct file *filp)
 	return single_open(filp, fg_uids_show, inode);
 }
 
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-extern void oblist_dequeue_topapp_change(uid_t topuid);
-#endif
 static ssize_t fg_uids_write(struct file *file, const char __user *buf,
 			     size_t count, loff_t *ppos)
 {
@@ -64,10 +61,6 @@ static ssize_t fg_uids_write(struct file *file, const char __user *buf,
 	}
 	fginfo.fg_uids = simple_strtol(buffer, NULL, 0);
 	fginfo.fg_num = 1;
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-	if (fginfo.fg_uids > 0)
-		oblist_dequeue_topapp_change(fginfo.fg_uids);
-#endif
 out:
 	return err < 0 ? err : count;
 }

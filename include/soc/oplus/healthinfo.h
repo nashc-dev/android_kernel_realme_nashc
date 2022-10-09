@@ -73,25 +73,6 @@ enum {
         OHM_TYPE_TOTAL
 };
 
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-struct ob_struct{
-	struct binder_proc *ob_proc;
-	struct list_head ob_list;
-	pid_t pid;
-	u64 ob_check_ts;
-	bool init;
-};
-
-struct binder_proc_status{
-	u64 warning;
-	u64 warning_cg_bg;
-	u64 async_mem_over_high;
-	u64 async_mem_over_low;
-	u64 sync_mem_over_high;
-	u64 sync_mem_over_low;
-};
-#endif
-
 struct sched_stat_common {
         u64 max_ms;
         u64 high_cnt;
@@ -131,8 +112,5 @@ extern void ohm_schedstats_record(int sched_type, struct task_struct *task, u64 
 extern int ohm_get_cur_cpuload(bool ctrl);
 extern void ohm_action_trig_with_msg(int type, char *msg);
 extern struct oplus_binder_proc_status system_server_proc;
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-extern struct binder_proc_status system_server_proc_status;
-#endif
 #endif /* _HEALTHINFO_H_*/
 

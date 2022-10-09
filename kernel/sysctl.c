@@ -133,14 +133,6 @@ static int sixty = 60;
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 extern sysctl_sched_impt_tgid;
 #endif
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-#include <soc/oplus/healthinfo.h>
-extern int sysctl_ob_control_enable;
-extern int sysctl_binder_status_record;
-extern int ob_pid;
-extern int sysctl_ob_control_handler(struct ctl_table *table, int write, void __user *buffer, size_t *lenp, loff_t *ppos);
-#endif
-
 static int __maybe_unused neg_one = -1;
 
 static int zero;
@@ -1435,29 +1427,6 @@ static struct ctl_table kern_table[] = {
 		.proc_handler = proc_dointvec,
 	},
 #endif /* CONFIG_OPLUS_PREFER_SILVER */
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-	{
-		.procname	= "oplus_binder_control_enabled",
-		.data		= &sysctl_ob_control_enable,
-		.maxlen 	= sizeof(int),
-		.mode		= 0660,
-		.proc_handler = sysctl_ob_control_handler,
-	},
-	{
-		.procname       = "oplus_binder_status_enabled",
-		.data           = &sysctl_binder_status_record,
-		.maxlen         = sizeof(int),
-		.mode           = 0660,
-		.proc_handler = proc_dointvec,
-	},
-	{
-		.procname	= "oplus_bg_thread_pid",
-		.data		= &ob_pid,
-		.maxlen 	= sizeof(int),
-		.mode		= 0660,
-		.proc_handler = proc_dointvec,
-	},
-#endif
 #if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_CTP)
 	{
 		.procname	= "task_cpustats_enable",

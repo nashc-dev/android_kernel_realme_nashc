@@ -703,41 +703,6 @@ static const struct file_operations proc_iowait_hung_fops = {
 	.read = iowait_hung_read,
 };
 
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-struct binder_proc_status system_server_proc_status;
-static ssize_t ss_binder_proc_read(struct file *filp, char __user *buff,
-				   size_t count, loff_t *off)
-{
-	char page[1024] = { 0 };
-	int len = 0;
-
-	len = sprintf(page,
-		    "async_mem_over_high: %llu\nasync_mem_over_low: %llu\nsync_mem_over_high: %llu\nsync_mem_over_low: %llu\nwarning_cg_bg: %llu\nwarning: %llu\n",
-		    system_server_proc_status.async_mem_over_high,
-		    system_server_proc_status.async_mem_over_low,
-		    system_server_proc_status.sync_mem_over_high,
-		    system_server_proc_status.sync_mem_over_low,
-		    system_server_proc_status.warning_cg_bg,
-		    system_server_proc_status.warning);
-
-	if (len > *off) {
-		len -= *off;
-	} else {
-		len = 0;
-	}
-	if (copy_to_user(buff, page, (len < count ? len : count))) {
-		return -EFAULT;
-	}
-	*off += len < count ? len : count;
-
-	return (len < count ? len : count);
-}
-
-static const struct file_operations proc_ss_fops = {
-	.read = ss_binder_proc_read,
-};
-#endif
-
 /******  cpu info show  ******/
 extern unsigned int cpufreq_quick_get_max(unsigned int cpu);
 static ssize_t cpu_info_read(struct file *filp, char __user *buff,
@@ -1038,13 +1003,6 @@ static int __init healthinfo_init(void)
 		ohm_err("create fsync_wait proc failed.\n");
 		goto ERROR_INIT_VERSION;
 	}
-#ifdef CONFIG_OPLUS_BINDER_STRATEGY
-	pentry = proc_create("systemserver", S_IRUGO, healthinfo, &proc_ss_fops);
-	if (!pentry) {
-		ohm_err("create ss_status proc failed.\n");
-		goto ERROR_INIT_VERSION;
-	}
-#endif
 	pentry = proc_create("cpu_loading", S_IRUGO, healthinfo,
 			&proc_cpu_load_fops);
 	if (!pentry) {
