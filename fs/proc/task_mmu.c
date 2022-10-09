@@ -1824,11 +1824,7 @@ cont:
 			break;
 	}
 	pte_unmap_unlock(pte - 1, ptl);
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-	(void)reclaim_pages_from_list(&page_list, vma, NULL);
-#else
 	reclaim_pages_from_list(&page_list, vma);
-#endif
 	if (addr != end)
 		goto cont;
 

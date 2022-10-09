@@ -56,10 +56,6 @@
 #include <linux/swapops.h>
 #include <linux/balloon_compaction.h>
 
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-#include <linux/process_mm_reclaim.h>
-#endif
-
 #include "internal.h"
 
 #define CREATE_TRACE_POINTS
@@ -134,9 +130,6 @@ struct scan_control {
 	 */
 	struct vm_area_struct *target_vma;
 
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-	struct mm_walk *walk;
-#endif
 };
 
 #ifdef ARCH_HAS_PREFETCH
@@ -1032,10 +1025,6 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		enum page_references references = PAGEREF_RECLAIM;
 		bool dirty, writeback;
 
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-		if (sc->walk && is_reclaim_should_cancel(sc->walk))
-			break;
-#endif
 		cond_resched();
 
 		page = lru_to_page(page_list);
@@ -1505,13 +1494,8 @@ unsigned long nswap_reclaim_page_list(struct list_head *page_list,
 #endif
 
 #ifdef CONFIG_PROCESS_RECLAIM
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-unsigned long reclaim_pages_from_list(struct list_head *page_list,
-			struct vm_area_struct *vma, struct mm_walk *walk)
-#else
 unsigned long reclaim_pages_from_list(struct list_head *page_list,
 					struct vm_area_struct *vma)
-#endif
 {
 	unsigned long nr_isolated[2] = {0, };
 	struct pglist_data *pgdat = NULL;
@@ -1522,9 +1506,6 @@ unsigned long reclaim_pages_from_list(struct list_head *page_list,
 		.may_unmap = 1,
 		.may_swap = 1,
 		.target_vma = vma,
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-		.walk = walk,
-#endif
 	};
 
 	unsigned long nr_reclaimed;
@@ -1794,11 +1775,7 @@ int isolate_lru_page(struct page *page)
 	int ret = -EBUSY;
 
 	VM_BUG_ON_PAGE(!page_count(page), page);
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-	WARN_RATELIMIT((!current_is_reclaimer() && PageTail(page)), "trying to isolate tail page");
-#else
 	WARN_RATELIMIT(PageTail(page), "trying to isolate tail page");
-#endif
 
 	if (PageLRU(page)) {
 		struct zone *zone = page_zone(page);

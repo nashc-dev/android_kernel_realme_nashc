@@ -35,10 +35,6 @@
 #include <linux/swapops.h>
 #include <linux/cpufreq.h>
 
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM) && defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-#include <linux/process_mm_reclaim.h>
-#endif
-
 #include "internal.h"
 
 extern unsigned long shrink_slab(gfp_t gfp_mask, int nid,

@@ -112,14 +112,6 @@ obj-$(CONFIG_HARDENED_USERCOPY) += usercopy.o
 obj-$(CONFIG_PERCPU_STATS) += percpu-stats.o
 obj-$(CONFIG_HMM) += hmm.o
 
-#if defined(OPLUS_FEATURE_PROCESS_RECLAIM)
-#/* Kui.Zhang@TEC.Kernel.Performance, 2019-03-13, add new interface for process memory reclaim*/
-#ifeq ($(OPLUS_FEATURE_PROCESS_RECLAIM), yes)
-obj-$(CONFIG_PROCESS_RECLAIM_ENHANCE) += process_mm_reclaim.o
-#else
-#obj-$(CONFIG_PROCESS_RECLAIM_ENHANCE) += process_mm_reclaim_weak.o
-#endif
-#endif /*defined(OPLUS_FEATURE_PROCESS_RECLAIM)
 
 #if defined(OPLUS_FEATURE_MEMLEAK_DETECT)
 #/* Kui.Zhang@TEC.Kernel.Performance, 2019-03-13, collect all tasks memory info */
