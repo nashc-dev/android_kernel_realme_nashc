@@ -27,9 +27,6 @@
 #include <linux/mm_types_task.h>
 #include <linux/task_io_accounting.h>
 
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-#include <linux/healthinfo/jank_monitor.h>
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 #include <linux/sched_assist/sched_assist_status.h>
 #endif
@@ -1438,17 +1435,6 @@ struct task_struct {
 	short nice_backup;
 	atomic_t inherit_types;
 #endif
-
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-	int jank_trace;
-	struct jank_monitor_info jank_info;
-	unsigned in_mutex:1;
-	unsigned in_downread:1;
-	unsigned in_downwrite:1;
-	unsigned in_futex:1;
-	unsigned in_binder:1;
-	unsigned in_epoll:1;
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 
 	/*
 	 * New fields for task_struct should be added above here, so that

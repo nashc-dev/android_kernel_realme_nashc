@@ -128,9 +128,4 @@ obj-$(CONFIG_DUMP_TASKS_MEM) += task_mem/
 #endif
 #endif /*defined(OPLUS_FEATURE_MEMLEAK_DETECT)
 
-#ifdef OPLUS_FEATURE_HEALTHINFO
-#/* Jiheng.Xie@TECH.BSP.Kernel, 2019-12-11, add for slub debug*/
-obj-y += healthinfo/
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
-
 obj-y += async_shrink_slabd.o

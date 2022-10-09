@@ -565,10 +565,6 @@ static void exit_mm(void)
 	enter_lazy_tlb(mm, current);
 	task_unlock(current);
 	mm_update_next_owner(mm);
-#if defined(OPLUS_FEATURE_VIRTUAL_RESERVE_MEMORY) && defined(CONFIG_OPLUS_HEALTHINFO) && defined(CONFIG_VIRTUAL_RESERVE_MEMORY)
-	//Trigger and upload the event.
-	trigger_svm_oom_event(mm, false, false);
-#endif
 	mmput(mm);
 	if (test_thread_flag(TIF_MEMDIE))
 		exit_oom_victim();

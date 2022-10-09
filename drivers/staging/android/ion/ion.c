@@ -62,12 +62,6 @@
 #include <mach/pseudo_m4u.h>
 #endif
 
-#ifdef OPLUS_FEATURE_HEALTHINFO
-#ifdef CONFIG_OPLUS_HEALTHINFO
-#include <linux/healthinfo/ion.h>
-#endif
-#endif /* OPLUS_FEATURE_HEALTHINFO */
-
 static atomic_long_t total_heap_bytes;
 
 struct ion_dmabuf_list {
@@ -406,13 +400,6 @@ exit:
 	mutex_unlock(&dev->buffer_lock);
 	atomic_long_add(len, &total_heap_bytes);
 	atomic_long_add(len, &heap->total_allocated);
-#ifdef OPLUS_FEATURE_HEALTHINFO
-#ifdef CONFIG_OPLUS_HEALTHINFO
-	/* add ion total used account*/
-	if (ion_cnt_enable)
-		atomic_long_add(buffer->size, &ion_total_size);
-#endif
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 	return buffer;
 
 err1:
@@ -428,13 +415,6 @@ void ion_buffer_destroy(struct ion_buffer *buffer)
 		WARN_ON(1);
 		buffer->heap->ops->unmap_kernel(buffer->heap, buffer);
 	}
-#ifdef OPLUS_FEATURE_HEALTHINFO
-#ifdef CONFIG_OPLUS_HEALTHINFO
-	/* add ion total used account */
-	if (ion_cnt_enable)
-		atomic_long_sub(buffer->size, &ion_total_size);
-#endif
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 	atomic_long_sub(buffer->size, &buffer->heap->total_allocated);
 #if defined(OPLUS_FEATURE_MEMLEAK_DETECT) && defined(CONFIG_DUMP_TASKS_MEM)
 	if (buffer->tsk) {

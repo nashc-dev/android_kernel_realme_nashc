@@ -111,10 +111,6 @@
 #include <mt-plat/turbo_common.h>
 #endif
 
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-#include <linux/healthinfo/jank_monitor.h>
-#endif /* OPLUS_FEATURE_HEALTHINFO */
-
 /*
  * Minimum number of threads to boot the kernel
  */
@@ -1934,10 +1930,6 @@ static __latent_entropy struct task_struct *copy_process(
 #ifdef CONFIG_MTK_TASK_TURBO
 	init_turbo_attr(p, current);
 #endif
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-	p->jank_trace = 0;
-	memset(&p->jank_info, 0, sizeof(struct jank_monitor_info));
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 #if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
 	p->wake_tid = 0;
 	p->running_start_time = 0;

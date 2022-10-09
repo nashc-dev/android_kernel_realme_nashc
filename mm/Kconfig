@@ -840,6 +840,3 @@ source "mm/malloc_track/Kconfig.compat"
 source "mm/task_mem/Kconfig"
 #endif
 
-#ifdef OPLUS_FEATURE_HEALTHINFO
-source "mm/healthinfo/Kconfig"
-#endif /*OPLUS_FEATURE_HEALTHINFO*/

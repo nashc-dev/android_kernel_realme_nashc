@@ -35,10 +35,6 @@
 #include <linux/task_work.h>
 
 #include <trace/events/sched.h>
-#if defined(OPLUS_FEATURE_IOMONITOR) && defined(CONFIG_IOMONITOR)
-#include <linux/iomonitor/iomonitor.h>
-#endif /*OPLUS_FEATURE_IOMONITOR*/
-
 #if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
 #include <linux/task_sched_info.h>
 #endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
@@ -52,12 +48,6 @@
 #include <linux/prefer_silver.h>
 #endif /* CONFIG_OPLUS_PREFER_SILVER */
 
-#ifdef OPLUS_FEATURE_HEALTHINFO
-// Add for get cpu load
-#ifdef CONFIG_OPLUS_HEALTHINFO
-#include <soc/oplus/healthinfo.h>
-#endif
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 /*
  * Targeted preemption latency for CPU-bound tasks:
  *
@@ -874,10 +864,6 @@ static void update_tg_load_avg(struct cfs_rq *cfs_rq, int force)
 }
 #endif /* CONFIG_SMP */
 
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-extern void  update_jank_trace_info(struct task_struct *tsk, int trace_type, unsigned int cpu, u64 delta);
-#endif /* OPLUS_FEATURE_HEALTHINFO */
-
 /*
  * Update the current task's runtime statistics.
  */
@@ -911,9 +897,6 @@ static void update_curr(struct cfs_rq *cfs_rq)
 		trace_sched_stat_runtime(curtask, delta_exec, curr->vruntime);
 		cpuacct_charge(curtask, delta_exec);
 		account_group_exec_runtime(curtask, delta_exec);
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-		update_jank_trace_info(curtask, JANK_TRACE_RUNNING, cpu_of(rq_of(cfs_rq)), delta_exec);
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 	}
 
 	account_cfs_rq_runtime(cfs_rq, delta_exec);
@@ -965,13 +948,6 @@ update_stats_wait_end(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			return;
 		}
 		trace_sched_stat_wait(p, delta);
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_HEALTHINFO)
-// Add for get sched latency stat
-		ohm_schedstats_record(OHM_SCHED_SCHEDLATENCY, p, (delta >> 20));
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-		update_jank_trace_info(p, JANK_TRACE_RUNNABLE, 0, delta);
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 #if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
 		update_task_sched_info(p, delta, task_sched_info_runnable, cpu_of(rq_of(cfs_rq)));
 #endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
@@ -1017,9 +993,6 @@ update_stats_enqueue_sleeper(struct cfs_rq *cfs_rq, struct sched_entity *se)
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 			sched_assist_update_record(tsk, delta, TST_SLEEP);
 #endif
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-			update_jank_trace_info(tsk, JANK_TRACE_SSTATE, 0, delta);
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 #if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
 			update_task_sched_info(tsk, delta, task_sched_info_S, task_cpu(tsk));
 #endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
@@ -1049,22 +1022,7 @@ update_stats_enqueue_sleeper(struct cfs_rq *cfs_rq, struct sched_entity *se)
 				schedstat_inc(se->statistics.iowait_count);
 				trace_sched_stat_iowait(tsk, delta);
 
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_HEALTHINFO)
-// Add for get iowait
-				ohm_schedstats_record(OHM_SCHED_IOWAIT, tsk, (delta >> 20));
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
-#if defined(OPLUS_FEATURE_IOMONITOR) && defined(CONFIG_IOMONITOR)
-				iomonitor_record_iowait(tsk, (delta >> 20));
-#endif /*OPLUS_FEATURE_IOMONITOR*/
 			}
-#if defined(OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_HEALTHINFO)
-			if(!tsk->in_iowait) {
-				 ohm_schedstats_record(OHM_SCHED_DSTATE, tsk, (delta >> 20));
-			}
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-	update_jank_trace_info(tsk, JANK_TRACE_DSTATE, 0, delta);
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 			trace_sched_stat_blocked(tsk, delta);
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 			sched_assist_update_record(tsk, delta, TST_SLEEP);

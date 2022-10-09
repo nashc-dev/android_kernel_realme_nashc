@@ -25,10 +25,6 @@
 
 #include "oplus_ion_boost_pool.h"
 
-#ifdef OPLUS_FEATURE_HEALTHINFO
-#include <linux/healthinfo/ion.h>
-#endif /* OPLUS_FEATURE_HEALTHINFO */
-
 #define MAX_BOOST_POOL_HIGH (1024 * 256)
 
 static bool boost_pool_enable = true;

@@ -1247,10 +1247,6 @@ static void print_slabinfo_header(struct seq_file *m)
 	seq_puts(m, " : globalstat <listallocs> <maxobjs> <grown> <reaped> <error> <maxfreeable> <nodeallocs> <remotefrees> <alienoverflow>");
 	seq_puts(m, " : cpustat <allochit> <allocmiss> <freehit> <freemiss>");
 #endif
-#ifdef OPLUS_FEATURE_HEALTHINFO
-	seq_puts(m, " <reclaim>");
-
-#endif
 	seq_putc(m, '\n');
 }
 
@@ -1306,14 +1302,8 @@ static void cache_show(struct kmem_cache *s, struct seq_file *m)
 
 	seq_printf(m, " : tunables %4u %4u %4u",
 		   sinfo.limit, sinfo.batchcount, sinfo.shared);
-#ifdef OPLUS_FEATURE_HEALTHINFO
-		seq_printf(m, " : slabdata %6lu %6lu %6lu %1d",
-			   sinfo.active_slabs, sinfo.num_slabs, sinfo.shared_avail,
-			   ((s->flags & SLAB_RECLAIM_ACCOUNT) == SLAB_RECLAIM_ACCOUNT) ? 1: 0);
-#else
 	seq_printf(m, " : slabdata %6lu %6lu %6lu",
 		   sinfo.active_slabs, sinfo.num_slabs, sinfo.shared_avail);
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 	slabinfo_show_stats(m, s);
 	seq_putc(m, '\n');
 }

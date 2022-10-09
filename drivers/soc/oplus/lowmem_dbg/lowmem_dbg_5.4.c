@@ -196,20 +196,9 @@ static long get_mem_usage_pages(enum mem_type type)
 		ret = vmalloc_nr_pages();
 		break;
 	case MEM_ION:
-#ifdef OPLUS_FEATURE_HEALTHINFO
-		ret = (ion_total() >> PAGE_SHIFT) +
-			global_zone_page_state(NR_IONCACHE_PAGES);
-		break;
-#endif
 	case MEM_ION_USED:
-#ifdef OPLUS_FEATURE_HEALTHINFO
-		ret = ion_total() >> PAGE_SHIFT;
-#endif
 		break;
 	case MEM_ION_CACHE:
-#ifdef OPLUS_FEATURE_HEALTHINFO
-		ret = global_zone_page_state(NR_IONCACHE_PAGES);
-#endif
 		break;
 	case MEM_GPU:
 #ifdef CONFIG_QCOM_KGSL

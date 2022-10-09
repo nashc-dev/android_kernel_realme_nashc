@@ -618,10 +618,6 @@ void elv_requeue_request(struct request_queue *q, struct request *rq)
 	 */
 	if (blk_account_rq(rq)) {
 		q->in_flight[rq_is_sync(rq)]--;
-#if defined(OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_HEALTHINFO)
-// Add for ioqueue
-		ohm_ioqueue_dec_inflight(q, rq);
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
 		if (rq->rq_flags & RQF_SORTED)
 			elv_deactivate_rq(q, rq);
 	}
@@ -654,10 +650,6 @@ void elv_drain_elevator(struct request_queue *q)
 
 void __elv_add_request(struct request_queue *q, struct request *rq, int where)
 {
-#if defined(OPLUS_FEATURE_IOMONITOR) && defined(CONFIG_IOMONITOR)
-	rq->req_ti = ktime_get();
-#endif /*OPLUS_FEATURE_IOMONITOR*/
-
 	trace_block_rq_insert(q, rq);
 
 	blk_pm_add_request(q, rq);
@@ -828,10 +820,6 @@ void elv_completed_request(struct request_queue *q, struct request *rq)
 	 */
 	if (blk_account_rq(rq)) {
 		q->in_flight[rq_is_sync(rq)]--;
-#if defined(OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_HEALTHINFO)
-// Add for ioqueue
-		ohm_ioqueue_dec_inflight(q, rq);
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
 		if ((rq->rq_flags & RQF_SORTED) &&
 		    e->type->ops.sq.elevator_completed_req_fn)
 			e->type->ops.sq.elevator_completed_req_fn(q, rq);

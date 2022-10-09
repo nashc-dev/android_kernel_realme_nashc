@@ -22,10 +22,6 @@ source "drivers/soc/zte/Kconfig"
 source "drivers/soc/oplus/lowmem_dbg/Kconfig"
 ##endif /* OPLUS_FEATURE_LOWMEM_DBG */
 
-#ifdef OPLUS_FEATURE_IOMONITOR
-source "drivers/soc/oplus/iomonitor/Kconfig"
-#endif /*OPLUS_FEATURE_IOMONITOR*/
-
 #ifdef OPLUS_FEATURE_MEMLEAK_DETECT
 #Add for svelte
 source "drivers/soc/oplus/svelte/Kconfig"
@@ -39,10 +35,6 @@ source "drivers/soc/oplus/system/Kconfig"
 #Qicai.gu  12:00, 2020/06/03  devi info
 source "drivers/soc/oplus/device_info/Kconfig"
 ##endif /* OPLUS_FEATURE_TP_BASIC */
-
-#ifdef OPLUS_FEATURE_HEALTHINFO
-source "drivers/soc/oplus/healthinfo/Kconfig"
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 
 #ifdef OPLUS_FEATURE_MIDAS
 source "drivers/soc/oplus/midas/Kconfig"

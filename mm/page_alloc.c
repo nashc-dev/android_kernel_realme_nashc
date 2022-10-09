@@ -76,10 +76,6 @@
 #include <asm/div64.h>
 #include "internal.h"
 
-#if defined(OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_MEM_MONITOR)
-#include <linux/healthinfo/memory_monitor.h>
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
-
 #if defined(CONFIG_DMAUSER_PAGES)
 #include <mt-plat/aee.h>
 #endif
@@ -3998,9 +3994,6 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
 	int no_progress_loops;
 	unsigned int cpuset_mems_cookie;
 	int reserve_flags;
-#if defined(OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_MEM_MONITOR)
-	unsigned long alloc_start = jiffies;
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
 	/*
 	 * We also sanity check to catch abuse of atomic reserves being used by
 	 * callers that are not in atomic context.
@@ -4236,9 +4229,6 @@ fail:
 	warn_alloc(gfp_mask, ac->nodemask,
 			"page allocation failure: order:%u", order);
 got_pg:
-#if defined(OPLUS_FEATURE_HEALTHINFO) && defined(CONFIG_OPLUS_MEM_MONITOR)
-	memory_alloc_monitor(gfp_mask, order, jiffies_to_msecs(jiffies - alloc_start));
-#endif /*OPLUS_FEATURE_HEALTHINFO*/
 	return page;
 }
 

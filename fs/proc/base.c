@@ -103,10 +103,6 @@
 
 #include "../../lib/kstrtox.h"
 
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-#include <linux/healthinfo/jank_monitor.h>
-#endif /* OPLUS_FEATURE_HEALTHINFO */
-
 #ifdef OPLUS_BUG_STABILITY
 extern size_t get_ion_heap_by_pid(pid_t pid);
 extern int get_gl_mem_by_pid(pid_t pid);
@@ -3167,10 +3163,6 @@ static const struct pid_entry tgid_base_stuff[] = {
 #ifdef CONFIG_CPU_FREQ_TIMES
 	ONE("time_in_state", 0444, proc_time_in_state_show),
 #endif
-
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-	REG("jank_info", S_IRUGO | S_IWUGO, proc_jank_trace_operations),
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 
 #ifdef OPLUS_BUG_STABILITY
 	REG("real_phymemory",    S_IRUGO, proc_pid_real_phymemory_ops),

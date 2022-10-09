@@ -68,8 +68,6 @@ obj-$(CONFIG_AW8697_HAPTIC)		+= aw8697_haptic/
 obj-$(CONFIG_MTK_FB)		+= oplus/
 #endif
 
-obj-$(CONFIG_OPLUS_MISC_HEALTHONFO)		+= oplus_misc_healthinfo/
-
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_core.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_bugs.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_heap.o

@@ -29,10 +29,6 @@ obj-$(CONFIG_ARCH_ZX)		+= zte/
 obj-$(CONFIG_OPLUS_FEATURE_LOWMEM_DBG)	+=  oplus/lowmem_dbg/
 #endif /* OPLUS_FEATURE_LOWMEM_DBG */
 
-#ifdef OPLUS_FEATURE_IOMONITOR
-obj-$(CONFIG_IOMONITOR)    +=  oplus/iomonitor/
-#endif /*OPLUS_FEATURE_IOMONITOR*/
-
 #ifdef OPLUS_FEATURE_MEMLEAK_DETECT
 #Add for svelte
 obj-$(CONFIG_SVELTE)     +=  oplus/svelte/
@@ -46,10 +42,6 @@ obj-y += oplus/system/
 #Qicai.gu  12:00, 2020/06/03  devi info
 obj-y +=   oplus/device_info/
 ##endif /* OPLUS_FEATURE_TP_BASIC */
-
-#ifdef OPLUS_FEATURE_HEALTHINFO
-obj-y  +=  oplus/healthinfo/
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 
 #ifdef OPLUS_FEATURE_MIDAS
 obj-$(CONFIG_OPLUS_FEATURE_MIDAS)    += oplus/midas/

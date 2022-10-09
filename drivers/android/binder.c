@@ -5083,14 +5083,7 @@ static int binder_wait_for_work(struct binder_thread *thread,
 			list_add(&thread->waiting_thread_node,
 				 &proc->waiting_threads);
 		binder_inner_proc_unlock(proc);
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-		if (!do_proc_work)
-			current->in_binder = 1;
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 		schedule();
-#if defined (OPLUS_FEATURE_HEALTHINFO) && defined (CONFIG_OPLUS_JANK_INFO)
-		current->in_binder = 0;
-#endif /* OPLUS_FEATURE_HEALTHINFO */
 		binder_inner_proc_lock(proc);
 		list_del_init(&thread->waiting_thread_node);
 		if (signal_pending(current)) {
