@@ -35,10 +35,6 @@
 #include <linux/task_work.h>
 
 #include <trace/events/sched.h>
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-#include <linux/task_sched_info.h>
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
-
 #include "sched.h"
 #include "tune.h"
 #include "walt.h"
@@ -948,9 +944,6 @@ update_stats_wait_end(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			return;
 		}
 		trace_sched_stat_wait(p, delta);
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-		update_task_sched_info(p, delta, task_sched_info_runnable, cpu_of(rq_of(cfs_rq)));
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 	}
 
 	schedstat_set(se->statistics.wait_max,
@@ -993,9 +986,6 @@ update_stats_enqueue_sleeper(struct cfs_rq *cfs_rq, struct sched_entity *se)
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 			sched_assist_update_record(tsk, delta, TST_SLEEP);
 #endif
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-			update_task_sched_info(tsk, delta, task_sched_info_S, task_cpu(tsk));
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 		}
 	}
 	if (block_start) {
@@ -1011,12 +1001,6 @@ update_stats_enqueue_sleeper(struct cfs_rq *cfs_rq, struct sched_entity *se)
 		schedstat_add(se->statistics.sum_sleep_runtime, delta);
 
 		if (tsk) {
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-			if (tsk->in_iowait)
-				update_task_sched_info(tsk, delta, task_sched_info_IO, task_cpu(tsk));
-			else
-				update_task_sched_info(tsk, delta, task_sched_info_D, task_cpu(tsk));
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 			if (tsk->in_iowait) {
 				schedstat_add(se->statistics.iowait_sum, delta);
 				schedstat_inc(se->statistics.iowait_count);

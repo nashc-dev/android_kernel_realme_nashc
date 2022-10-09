@@ -21,10 +21,6 @@
 #include "sched.h"
 #include "tune.h"
 #include "cpufreq_schedutil.h"
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-#include <linux/task_sched_info.h>
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
-
 static struct cpufreq_governor schedutil_gov;
 unsigned long boosted_cpu_util(int cpu);
 
@@ -175,9 +171,6 @@ static void sugov_update_commit(struct sugov_policy *sg_policy, u64 time,
 #ifdef CONFIG_MTK_TINYSYS_SSPM_SUPPORT
 	mt_cpufreq_set_by_wfi_load_cluster(cid, next_freq);
 	policy->cur = next_freq;
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-	update_freq_info(policy);
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 	trace_sched_util(cid, next_freq, time);
 #else
 	if (policy->fast_switch_enabled) {
@@ -186,9 +179,6 @@ static void sugov_update_commit(struct sugov_policy *sg_policy, u64 time,
 			return;
 
 		policy->cur = next_freq;
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-		update_freq_info(policy);
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 		trace_cpu_frequency(next_freq, smp_processor_id());
 	} else {
 		sg_policy->work_in_progress = true;

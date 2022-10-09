@@ -786,11 +786,6 @@ struct task_struct {
 	unsigned int			flags;
 	unsigned int			ptrace;
 
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-	u64 wake_tid;
-	u64 running_start_time;
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
-
 #ifdef CONFIG_SMP
 	struct llist_node		wake_entry;
 	int				on_cpu;
@@ -1859,9 +1854,6 @@ static inline void kick_process(struct task_struct *tsk) { }
 extern pid_t alloc_svc_tgid;
 #endif /* CONFIG_OPLUS_ION_BOOSTPOOL */
 extern void __set_task_comm(struct task_struct *tsk, const char *from, bool exec);
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-extern void get_target_thread_pid(struct task_struct *p);
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 static inline void set_task_comm(struct task_struct *tsk, const char *from)
 {
 	__set_task_comm(tsk, from, false);
@@ -1869,9 +1861,6 @@ static inline void set_task_comm(struct task_struct *tsk, const char *from)
 	if (!strncmp(from, "allocator@4.0-s", TASK_COMM_LEN))
 		alloc_svc_tgid = tsk->tgid;
 #endif /* CONFIG_OPLUS_ION_BOOSTPOOL */
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-	get_target_thread_pid(tsk);
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 }
 
 extern char *__get_task_comm(char *to, size_t len, struct task_struct *tsk);

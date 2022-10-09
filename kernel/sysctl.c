@@ -70,10 +70,6 @@
 #include <linux/uaccess.h>
 #include <asm/processor.h>
 
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_CTP)
-#include <linux/task_cpustats.h>
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_CTP) */
-
 #ifdef CONFIG_X86
 #include <asm/nmi.h>
 #include <asm/stacktrace.h>
@@ -1427,17 +1423,6 @@ static struct ctl_table kern_table[] = {
 		.proc_handler = proc_dointvec,
 	},
 #endif /* CONFIG_OPLUS_PREFER_SILVER */
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_CTP)
-	{
-		.procname	= "task_cpustats_enable",
-		.data		= &sysctl_task_cpustats_enable,
-		.maxlen		= sizeof(unsigned int),
-		.mode		= 0666,
-		.proc_handler	= proc_dointvec_minmax,
-		.extra1         = &zero,
-		.extra2		= &one,
-	},
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_CTP) */
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
 	{
 		.procname	= "sched_impt_tgid",

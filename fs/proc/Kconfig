@@ -89,6 +89,3 @@ config PROC_UID
 	help
 	Provides aggregated per-uid information under /proc/uid.
 
-#ifdef OPLUS_FEATURE_TASK_CPUSTATS
-source "fs/proc/task_cpustats/Kconfig"
-#endif /* OPLUS_FEATURE_TASK_CPUSTATS */
