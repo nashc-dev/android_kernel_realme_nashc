@@ -38,11 +38,6 @@
 #include <linux/arm-smccc.h>
 #include <uapi/linux/psci.h>
 
-#ifdef OPLUS_FEATURE_PERFORMANCE
-//ZuoTong@ANDROID.PERFORMANCE, 2020/06/28,Add for flushing device cache before goto dump mode!
-extern bool is_triggering_panic;
-extern void flush_cache_on_panic(void);
-#endif  /*OPLUS_FEATURE_PERFORMANCE*/
 static char mrdump_lk[12];
 bool mrdump_ddr_reserve_ready;
 
@@ -183,15 +178,6 @@ int mrdump_common_die(int fiq_step, int reboot_reason, const char *msg,
 	panic_flush_device_cache(2000);
 #endif
 
-#ifdef OPLUS_FEATURE_PERFORMANCE
-//ZuoTong@ANDROID.PERFORMANCE, 2020/06/28,Add for flushing device cache before go to dump mode!
-    if(!is_triggering_panic)
-    {
-        is_triggering_panic = true;
-        pr_notice("is_triggering_panic : true\n");
-        flush_cache_on_panic();
-    }
-#endif // OPLUS_FEATURE_PERFORMANCE
 	bust_spinlocks(1);
 	aee_disable_api();
 

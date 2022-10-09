@@ -47,12 +47,6 @@ int hwt_happened = 0;
 int is_kernel_panic = 0;
 #endif
 
-#ifdef OPLUS_FEATURE_PERFORMANCE
-//ZuoTong@ANDROID.PERFORMANCE, 2020/06/28,Add for flushing device cache before goto dump mode!
-bool is_triggering_panic = false;
-bool is_triggering_hwt = false;
-#endif  /*OPLUS_FEATURE_PERFORMANCE*/
-
 int panic_on_oops = CONFIG_PANIC_ON_OOPS_VALUE;
 static unsigned long tainted_mask;
 static int pause_on_oops;
@@ -169,20 +163,6 @@ void nmi_panic(struct pt_regs *regs, const char *msg)
 		nmi_panic_self_stop(regs);
 }
 EXPORT_SYMBOL(nmi_panic);
-
-#ifdef OPLUS_FEATURE_PERFORMANCE
-//ZuoTong@ANDROID.PERFORMANCE, 2020/06/28,Add for flushing device cache before goto dump mode!
-extern int panic_flush_device_cache(int timeout);
-extern unsigned int get_eng_version(void);
-void flush_cache_on_panic(void){
-    if (get_eng_version() == 1){
-        pr_err("In full dump mode!\n");
-    }else{
-        pr_err("In mini dump mode and start flushing the devices cache!");
-        panic_flush_device_cache(2000);
-    }
-}
-#endif  /*OPLUS_FEATURE_PERFORMANCE*/
 
 /**
  *	panic - halt the system
