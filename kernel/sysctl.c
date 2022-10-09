@@ -148,10 +148,6 @@ extern int direct_vm_swappiness;
 static int two_hundred = 200;
 #endif /*OPLUS_FEATURE_ZRAM_OPT*/
 
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-unsigned int sysctl_fg_io_opt = 1;
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 static int one_thousand = 1000;
 #ifdef CONFIG_PRINTK
 static int ten_thousand = 10000;
@@ -367,16 +363,6 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 },
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-	{
-		.procname	= "fg_io_opt",
-		.data		= &sysctl_fg_io_opt,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= proc_dointvec,
-	},
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 #ifdef CONFIG_SCHED_DEBUG
 	{
 		.procname	= "sched_min_granularity_ns",

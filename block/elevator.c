@@ -42,10 +42,6 @@
 #include "blk.h"
 #include "blk-mq-sched.h"
 #include "blk-wbt.h"
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-#include "foreground_io_opt/foreground_io_opt.h"
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 static DEFINE_SPINLOCK(elv_list_lock);
 static LIST_HEAD(elv_list);
 
@@ -418,10 +414,6 @@ void elv_dispatch_sort(struct request_queue *q, struct request *rq)
 	}
 
 	list_add(&rq->queuelist, entry);
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-	queue_throtl_add_request(q, rq, false);
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 }
 EXPORT_SYMBOL(elv_dispatch_sort);
 
@@ -442,10 +434,6 @@ void elv_dispatch_add_tail(struct request_queue *q, struct request *rq)
 	q->end_sector = rq_end_sector(rq);
 	q->boundary_rq = rq;
 	list_add_tail(&rq->queuelist, &q->queue_head);
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-	queue_throtl_add_request(q, rq, false);
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 }
 EXPORT_SYMBOL(elv_dispatch_add_tail);
 
@@ -672,20 +660,12 @@ void __elv_add_request(struct request_queue *q, struct request *rq, int where)
 	case ELEVATOR_INSERT_FRONT:
 		rq->rq_flags |= RQF_SOFTBARRIER;
 		list_add(&rq->queuelist, &q->queue_head);
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-		queue_throtl_add_request(q, rq, true);
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 		break;
 
 	case ELEVATOR_INSERT_BACK:
 		rq->rq_flags |= RQF_SOFTBARRIER;
 		elv_drain_elevator(q);
 		list_add_tail(&rq->queuelist, &q->queue_head);
-#if defined(OPLUS_FEATURE_FG_IO_OPT) && defined(CONFIG_OPLUS_FG_IO_OPT)
-/*Huacai.Zhou@Tech.Kernel.MM, 2020-03-23,add foreground io opt*/
-		queue_throtl_add_request(q, rq, false);
-#endif /*OPLUS_FEATURE_FG_IO_OPT*/
 		/*
 		 * We kick the queue here for the following reasons.
 		 * - The elevator might have returned NULL previously
