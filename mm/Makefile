@@ -133,12 +133,4 @@ obj-$(CONFIG_DUMP_TASKS_MEM) += task_mem/
 obj-y += healthinfo/
 #endif /*OPLUS_FEATURE_HEALTHINFO*/
 
-#if defined(OPLUS_FEATURE_MULTI_FREEAREA)
-obj-$(CONFIG_PHYSICAL_ANTI_FRAGMENTATION) += multi_freearea.o
-#endif
-
-#ifdef OPLUS_FEATURE_MULTI_KSWAPD
-obj-$(CONFIG_OPLUS_MULTI_KSWAPD) += multi_kswapd/
-#endif /*OPLUS_FEATURE_MULTI_KSWAPD*/
-
 obj-y += async_shrink_slabd.o

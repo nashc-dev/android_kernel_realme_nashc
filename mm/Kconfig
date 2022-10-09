@@ -812,14 +812,6 @@ config PROCESS_RECLAIM
 
 	 Any other value is ignored.
 
-#ifdef OPLUS_FEATURE_MULTI_FREEAREA
-config PHYSICAL_ANTI_FRAGMENTATION
-	bool "Physical memory anti-fragmentation"
-	default y
-	help
-	 Turn on the function of Physical memory anti-fragmentation.
-#endif /* OPLUS_FEATURE_MULTI_FREEAREA */
-
 config FRAME_VECTOR
 	bool
 
@@ -847,10 +839,6 @@ config PERCPU_STATS
 source "mm/malloc_track/Kconfig.compat"
 source "mm/task_mem/Kconfig"
 #endif
-
-#ifdef OPLUS_FEATURE_MULTI_KSWAPD
-source "mm/multi_kswapd/Kconfig"
-#endif /*OPLUS_FEATURE_MULTI_KSWAPD*/
 
 #ifdef OPLUS_FEATURE_HEALTHINFO
 source "mm/healthinfo/Kconfig"
