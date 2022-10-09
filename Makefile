@@ -235,10 +235,7 @@ ifneq ($(filter $(no-dot-config-targets), $(MAKECMDGOALS)),)
 	endif
 endif
 
-#ifdef OPLUS_ARCH_INJECT
-#Sunliang@ANDROID.BUILD, 2020/04/08, export global native features to kernel
 -include OplusKernelEnvConfig.mk
-#endif /* OPLUS_ARCH_INJECT */
 
 ifeq ($(KBUILD_EXTMOD),)
         ifneq ($(filter config %config,$(MAKECMDGOALS)),)
@@ -627,7 +624,6 @@ export KBUILD_MODULES KBUILD_BUILTIN
 
 KBUILD_CFLAGS += -DOPLUS_FEATURE_SENSOR
 KBUILD_CFLAGS += -DOPLUS_FEATURE_SENSOR_ALGORITHM
-KBUILD_CFLAGS += -DOPLUS_FEATURE_SENSOR_SMEM
 KBUILD_CFLAGS += -DOPLUS_FEATURE_SENSOR_WISELIGHT
 ifeq ($(KBUILD_EXTMOD),)
 # Additional helpers built in scripts/
