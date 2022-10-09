@@ -167,47 +167,6 @@ static int mt6853_spk_i2s_in_type_get(struct snd_kcontrol *kcontrol,
 	ucontrol->value.integer.value[0] = idx;
 	return 0;
 }
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-static int speaker_mute_control = 0;
-static int kspk_enable_spk_pa_state = 0;
-
-static const char *const spk_mute_function[] = { "Off", "On" };
-
-static const struct soc_enum spkmute_snd_enum[] = {
-    SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(spk_mute_function), spk_mute_function),
-};
-
-static int speaker_mute_get_status(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
-{
-	ucontrol->value.integer.value[0] = speaker_mute_control;
-	pr_err("%s(), speaker_mute_control = %d\n", __func__, speaker_mute_control);
-	return 0;
-}
-
-static int speaker_mute_put_status(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
-{
-
-	if(ucontrol->value.integer.value[0] == speaker_mute_control)
-		return 1;
-	speaker_mute_control = ucontrol->value.integer.value[0];
-
-	if(speaker_mute_control)
-	{
-		if (OPLUS_PA_AWINIC == oplus_pa_type) {
-		} else if (OPLUS_PA_SIA == oplus_pa_type) {
-			sia81xx_stop();
-		}
-	} else {
-		if((kspk_enable_spk_pa_state)&&(OPLUS_PA_AWINIC == oplus_pa_type)) {
-		} else if ((kspk_enable_spk_pa_state)&&(OPLUS_PA_SIA == oplus_pa_type)) {
-			sia81xx_start();
-		}
-	}
-
-	pr_err("%s(), speaker_mute_control = %d\n", __func__, ucontrol->value.integer.value[0]);
-	return 0;
-}
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 static int mt6853_mt6359_spk_amp_event(struct snd_soc_dapm_widget *w,
 				       struct snd_kcontrol *kcontrol,
 				       int event)
@@ -226,13 +185,6 @@ static int mt6853_mt6359_spk_amp_event(struct snd_soc_dapm_widget *w,
 		}
 #endif  /*CONFIG_SND_SOC_CODEC_AW87339*/
 
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-		if(speaker_mute_control){
-			dev_err(card->dev, "%s(), speaker force mute\n", __func__);
-			return 0;
-		}
-		kspk_enable_spk_pa_state = 1;
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 #ifdef OPLUS_BUG_COMPATIBILITY
         if (OPLUS_PA_SIA == oplus_pa_type) {
 	        dev_err(card->dev, "%s(), line = %d event %d\n", __func__, __LINE__, event);
@@ -242,9 +194,6 @@ static int mt6853_mt6359_spk_amp_event(struct snd_soc_dapm_widget *w,
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
 		/* spk amp off control */
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-		kspk_enable_spk_pa_state = 0;
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 #ifdef CONFIG_SND_SOC_CODEC_AW87339
 		if (OPLUS_PA_AWINIC == oplus_pa_type) {
 			aw87339_audio_spk_if_off();
@@ -300,9 +249,6 @@ static const struct snd_kcontrol_new mt6853_mt6359_controls[] = {
 			  hal_feedback_config_get, hal_feedback_config_set),
 	#endif //CONFIG_OPLUS_FEATURE_MM_FEEDBACK
 	#ifdef OPLUS_BUG_COMPATIBILITY
-	#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-	SOC_ENUM_EXT("Speaker_Mute_Switch", spkmute_snd_enum[0], speaker_mute_get_status, speaker_mute_put_status),
-	#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 	{
 		.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
 		.name = "OPLUS_AUDIO_EXTERN_CONFIG",

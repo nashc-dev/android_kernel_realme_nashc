@@ -169,64 +169,6 @@ static int mt6833_spk_i2s_in_type_get(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-static int speaker_mute_control = 0;
-static int kspk_enable_spk_pa_state = 0;
-
-static const char *const spk_mute_function[] = { "Off", "On" };
-
-static const struct soc_enum spkmute_snd_enum[] = {
-    SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(spk_mute_function), spk_mute_function),
-};
-
-static int speaker_mute_get_status(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
-{
-	ucontrol->value.integer.value[0] = speaker_mute_control;
-	pr_err("%s(), speaker_mute_control = %d\n", __func__, speaker_mute_control);
-	return 0;
-}
-
-static int speaker_mute_put_status(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
-{
-
-	if(ucontrol->value.integer.value[0] == speaker_mute_control)
-		return 1;
-	speaker_mute_control = ucontrol->value.integer.value[0];
-
-	if(speaker_mute_control)
-	{
-#ifdef CONFIG_SND_SOC_OPLUS_PA_MANAGER
-		oplus_ext_amp_l_enable(false);
-		oplus_ext_amp_r_enable(false);
-#else
-		if (OPLUS_PA_AWINIC == oplus_pa_type) {
-                #ifdef CONFIG_SND_SOC_CODEC_AW87339
-			aw87339_audio_spk_if_off();
-                #endif  /*CONFIG_SND_SOC_CODEC_AW87339*/
-		} else if (OPLUS_PA_SIA == oplus_pa_type) {
-			sia81xx_stop();
-		}
-#endif //CONFIG_SND_SOC_OPLUS_PA_MANAGER
-	} else {
-#ifdef CONFIG_SND_SOC_OPLUS_PA_MANAGER
-		oplus_ext_amp_l_enable(true);
-		oplus_ext_amp_r_enable(true);
-#else
-		if((kspk_enable_spk_pa_state)&&(OPLUS_PA_AWINIC == oplus_pa_type)) {
-                #ifdef CONFIG_SND_SOC_CODEC_AW87339
-			aw87339_audio_spk_if_kspk();
-                #endif  /*CONFIG_SND_SOC_CODEC_AW87339*/
-		} else if ((kspk_enable_spk_pa_state)&&(OPLUS_PA_SIA == oplus_pa_type)) {
-			sia81xx_start();
-		}
-#endif //CONFIG_SND_SOC_OPLUS_PA_MANAGER
-	}
-
-	pr_err("%s(), speaker_mute_control = %d\n", __func__, ucontrol->value.integer.value[0]);
-	return 0;
-}
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
-
 #ifdef OPLUS_BUG_COMPATIBILITY
 static int rcv_amp_mode;
 static const char *rcv_amp_type_str[] = {"SPEAKER_MODE", "RECIEVER_MODE"};
@@ -267,13 +209,6 @@ static int mt6833_mt6359_spk_amp_event(struct snd_soc_dapm_widget *w,
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
 		/* spk amp on control */
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-		if(speaker_mute_control){
-			dev_err(card->dev, "%s(), speaker force mute\n", __func__);
-			return 0;
-		}
-		kspk_enable_spk_pa_state = 1;
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 #ifdef CONFIG_SND_SOC_AW87339
 		aw87339_spk_enable_set(true);
 #endif
@@ -288,9 +223,6 @@ static int mt6833_mt6359_spk_amp_event(struct snd_soc_dapm_widget *w,
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
 		/* spk amp off control */
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-		kspk_enable_spk_pa_state = 0;
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 #ifdef CONFIG_SND_SOC_AW87339
 		aw87339_spk_enable_set(false);
 #endif
@@ -324,22 +256,12 @@ static int mt6833_mt6359_rcv_amp_event(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-		if (speaker_mute_control) {
-			dev_err(card->dev, "%s(), speaker force mute%d\n", __func__);
-			return 0;
-		}
-		kspk_enable_spk_pa_state = 1;
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 		if(rcv_amp_mode == 1)
 			oplus_ext_amp_recv_enable(true);
 		else
 			oplus_ext_amp_r_enable(true);
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
-#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-		kspk_enable_spk_pa_state = 0;
-#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 		if(rcv_amp_mode == 1)
 			oplus_ext_amp_recv_enable(false);
 		else
@@ -397,9 +319,6 @@ static const struct snd_kcontrol_new mt6833_mt6359_controls[] = {
 	SOC_ENUM_EXT("MTK_SPK_I2S_IN_TYPE_GET", mt6833_spk_type_enum[1],
 		     mt6833_spk_i2s_in_type_get, NULL),
 	#ifdef OPLUS_BUG_COMPATIBILITY
-	#ifdef OPLUS_FEATURE_SPEAKER_MUTE
-	SOC_ENUM_EXT("Speaker_Mute_Switch", spkmute_snd_enum[0], speaker_mute_get_status, speaker_mute_put_status),
-	#endif /* OPLUS_FEATURE_SPEAKER_MUTE */
 	{
 		.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
 		.name = "OPLUS_AUDIO_EXTERN_CONFIG",
