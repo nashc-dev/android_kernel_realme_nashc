@@ -121,7 +121,6 @@ config MACH_MT6785
 	select EXT4_FS
 	select EXT4_FS_SECURITY
 	select EXT4_ENCRYPTION
-	select SDCARD_FS
 	select OVERLAY_FS
 	select CPU_IDLE
 	select MTK_BASE_POWER
@@ -158,7 +157,6 @@ config MACH_MT6781
 	select MTK_TIMER_SYSTIMER
 	select IRQ_DOMAIN
 	select MFD_SYSCON
-	select SDCARD_FS
 	select MTK_LPM
 	select MTK_LOW_POWER_MODULE
 	select MTK_LPM_MT6781
@@ -335,7 +333,6 @@ config MACH_MT6768
 	select ARM64_CRYPTO
 	select CRYPTO_SHA2_ARM64_CE
 	select CRYPTO_AES_ARM64_CE_BLK
-	select SDCARD_FS
 	select MTK_SYSTRACKER_V2
 	select MTK_CACHE_PARITY_CHECK
 	select MTK_LASTBUS_INTERFACE
