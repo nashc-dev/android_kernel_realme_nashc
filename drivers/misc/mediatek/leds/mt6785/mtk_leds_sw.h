@@ -149,6 +149,16 @@ struct PWM_config {
  ***************************************************************************/
 
 /**
+ * led brightness mapping data structure
+ * map: brightness level mapping table
+ * size: size of bl_levels
+ */
+struct led_blmap {
+	unsigned int *map;
+	unsigned int size;
+};
+
+/**
  * led customization data structure
  * name : must the same as lights HAL
  * mode : control mode
@@ -164,7 +174,7 @@ struct cust_mt65xx_led {
 	enum mt65xx_led_mode mode;
 	long data;
 	struct PWM_config config_data;
-	unsigned int *blmap;
+	struct led_blmap blmap;
 };
 
 /**
@@ -203,13 +213,13 @@ struct nled_setting {
 
 static inline unsigned int brightness_mapping(struct cust_mt65xx_led* led, unsigned int level)
 {
-	// Does this LED have a brightness mapping table?
-	if (led->blmap) {
-		// Yes, so use it to translate the brightness level
-		if (level >= BLMAP_SIZE) {
-			level = BLMAP_SIZE - 1;
-		}
-		level = led->blmap[level];
+	struct led_blmap *blmap = &led->blmap;
+
+	if (blmap->size > 0) {
+		if (level >= blmap->size)
+			level = blmap->size - 1;
+
+		level = blmap->map[level];
 	}
 
 	return level;

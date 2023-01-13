@@ -166,8 +166,8 @@ struct cust_mt65xx_led *get_cust_led_dtsi(void)
 	bool isSupportDTS = false;
 	int i, ret;
 	int mode, data;
+	int blmap_size;
 	int pwm_config[5] = { 0 };
-	unsigned int blmap[BLMAP_SIZE] = { 0 };
 
 	if (pled_dtsi)
 		goto out;
@@ -261,26 +261,27 @@ struct cust_mt65xx_led *get_cust_led_dtsi(void)
 			break;
 		}
 
-		/* blmap is a 256 length unsigned int array */
-		ret = of_property_read_u32_array(led_node, "blmap",
-				blmap, BLMAP_SIZE);
-		
+		ret = of_property_read_u32(led_node, "blmap_size", &blmap_size);
+
 		if (!ret) {
-			// Allocate memory for the blmap
-			pled_dtsi[i].blmap = kmalloc(sizeof(unsigned int) * BLMAP_SIZE, GFP_KERNEL);
-			if (!pled_dtsi[i].blmap) {
-				LEDS_DEBUG("led dts can't allocate memory for blmap\n");
+			pled_dtsi[i].blmap.size = blmap_size;
+			pled_dtsi[i].blmap.map = kmalloc(sizeof(unsigned int) * blmap_size, GFP_KERNEL);
+			if (!pled_dtsi[i].blmap.map) {
+				LEDS_DEBUG("led dts can't allocate memory for blmap->map\n");
 				continue;
 			}
 
-			// Copy the blmap
-			memcpy(pled_dtsi[i].blmap, blmap, sizeof(unsigned int) * BLMAP_SIZE);
+			ret = of_property_read_u32_array(led_node, "blmap",
+					pled_dtsi[i].blmap.map, blmap_size);
 
-			LEDS_DEBUG("%s's blmap is ready\n", pled_dtsi[i].name);
-		}
-		else {
-			LEDS_DEBUG("led dts can't get blmap\n");
-		}
+			if (ret) {
+				LEDS_DEBUG("led dts can't get blmap\n");
+				kfree(pled_dtsi[i].blmap.map);
+				pled_dtsi[i].blmap.map = NULL;
+				pled_dtsi[i].blmap.size = 0;
+			}
+		} else
+			LEDS_DEBUG("led dts can't get blmap_size, blmap will be NULL\n");
 	}
 
 	if (!isSupportDTS) {
