@@ -11,6 +11,7 @@
 ******************************************************************/
 #include "oplus_display_onscreenfingerprint.h"
 
+extern bool oplus_dimlayer_hbm;
 extern bool oplus_fp_notify_down_delay;
 extern bool oplus_fp_notify_up_delay;
 bool oplus_doze_fpd_nodelay;
@@ -26,6 +27,24 @@ int oplus_display_panel_set_finger_print(void *buf)
 	}
 
 	printk(KERN_ERR "%s receive uiready %d\n", __func__, (*fingerprint_op_mode));
+	return 0;
+}
+
+int oplus_display_panel_set_dimlayer_hbm(void *buf)
+{
+	unsigned int *dimlayer_hbm = buf;
+
+	oplus_dimlayer_hbm = !!(*dimlayer_hbm);
+
+	return 0;
+}
+
+int oplus_display_panel_get_dimlayer_hbm(void *buf)
+{
+	unsigned int *dimlayer_hbm = buf;
+
+	*dimlayer_hbm = !!oplus_dimlayer_hbm;
+
 	return 0;
 }
 
