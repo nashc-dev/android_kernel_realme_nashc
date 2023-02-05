@@ -65,6 +65,7 @@ unsigned long oplus_display_brightness = 0;
 unsigned long oplus_max_normal_brightness = 0;
 int oplus_max_brightness = OPLUS_MAX_BRIGHTNESS;
 
+bool oplus_dimlayer_hbm = false;
 bool oplus_fp_notify_down_delay = false;
 bool oplus_fp_notify_up_delay = false;
 extern void fingerprint_send_notify(unsigned int fingerprint_op_mode);
