@@ -50,6 +50,7 @@
 		incell_screen;
 		fw_edge_limit_support;
 		black_gesture_support;
+		black_gesture_indep_support;
 		charger_pump_support;
 		headset_pump_support;
 		esd_handle_support;
@@ -113,6 +114,7 @@
 		project_id = <20730>;
 		irq_need_dev_resume_ok;
 		black_gesture_support;
+		black_gesture_indep_support;
 		fw_edge_limit_support;
 		pressure_report_support;
 		charger_pump_support;
@@ -158,6 +160,7 @@
                 project_id = <20730>;
                 irq_need_dev_resume_ok;
                 black_gesture_support;
+		black_gesture_indep_support;
                 fw_edge_limit_support;
                 pressure_report_support;
                 charger_pump_support;
