@@ -41,10 +41,6 @@ static int s_speaker_reboot = 0;
 #include "aw_bin_parse.h"
 #include "aw_spin.h"
 
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
-#endif
-
 #define AW882XX_DRIVER_VERSION "v1.10.0"
 #define AW882XX_I2C_NAME "aw882xx_smartpa"
 
@@ -411,236 +407,6 @@ static void aw882xx_start_pa(struct aw882xx *aw882xx)
 
 }
 
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-#define AW882XX_CHECK_WORK_DELAY           (6*HZ)
-#define OPLUS_AUDIO_EVENTID_SMARTPA_ERR    10041
-#define OPLUS_AUDIO_EVENTID_SPK_ERR        10042
-#define ERROR_INFO_MAX_LEN                 20
-#define AW882XX_STATUS_REG                 0x01
-#define AW882XX_STATUS_NORMAL_VALUE        0x311
-/* 0xCFBB = 1100101110111011b, mask bit0/1/3/4/5/7/8/9/11/14/15 */
-#define AW882XX_STATUS_CHECK_MASK          0xCBBB
-
-enum {
-	RE_ERR_IV_OR_MEC_DISABLE = -99000,
-	RE_ERR_NOT_WORK = -2000,
-	RE_ERR_IV_ERR = -1000,
-	RE_ERR_SHORT_MIN = -500,
-	RE_ERR_SHORT_MAX = 500,
-	RE_NORMAL_MIN = 4500,
-	RE_NORMAL_MAX = 8500,
-	RE_ERR_OPEN = 99000,
-};
-
-struct check_status_err {
-	int bit;
-	uint32_t err_val;
-	char info[ERROR_INFO_MAX_LEN];
-};
-static const struct check_status_err check_err[] = {
-	{0,  0, "PllUnlock"},
-	{1,  1, "OverTemperature"},
-	{3,  1, "BoostOverCurrent"},
-	{4,  0, "UnstableClk"},
-	{5,  1, "NoClock"},
-	{7,  1, "Clipping"},
-	{8,  0, "NotSwitch"},
-	{9,  0, "NoBoost"},
-	{11, 1, "CurrentHigh"},
-	{14, 1, "VbatLow"},
-	{15, 1, "BoostOVP"},
-};
-
-const unsigned char fb_regs_aw88264[] = {0x02, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0a, 0x0b, 0x0c, 0x10, 0x12, 0x13, 0x14, 0x60, 0x61};
-const unsigned char fb_regs_aw88265[] = {0x02, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0a, 0x0b, 0x0c, 0x20, 0x21, 0x22, 0x23, 0x60, 0x61};
-
-static bool g_chk_err = false;
-
-static int aw882xx_check_status_reg(struct aw882xx *aw882xx)
-{
-	unsigned int reg_val = 0;
-	char fd_buf[MM_KEVENT_MAX_PAYLOAD_SIZE] = {0};
-	char info[MM_KEVENT_MAX_PAYLOAD_SIZE] = {0};
-	int offset = 0;
-	int i = 0;
-	int ret = 0;
-
-	if ((aw882xx->last_fb !=0) && ktime_before(ktime_get(), ktime_add_ms(aw882xx->last_fb, MM_FB_KEY_RATELIMIT_1MIN))) {
-		return 0;
-	}
-
-	ret = aw882xx_i2c_read(aw882xx, AW882XX_STATUS_REG, &reg_val);
-	if (ret < 0) {
-		offset = strlen(info);
-		scnprintf(info + offset, sizeof(info) - offset - 1, \
-				"AW882xx SPK%u:failed to read regs 0x%x, ret=%d,", \
-				aw882xx->index + 1, AW882XX_STATUS_REG, ret);
-		aw_dev_info(aw882xx->dev, "i2c read error, ret=%d", ret);
-	} else {
-		aw_dev_info(aw882xx->dev, "read reg[0x%x]=0x%x", AW882XX_STATUS_REG, reg_val);
-		if ((AW882XX_STATUS_NORMAL_VALUE & AW882XX_STATUS_CHECK_MASK) != (reg_val & AW882XX_STATUS_CHECK_MASK)) {
-			offset = strlen(info);
-			scnprintf(info + offset, sizeof(info) - offset - 1, \
-					"AW882xx SPK%u:reg[0x%x]=0x%x,", \
-					aw882xx->index + 1, AW882XX_STATUS_REG, reg_val);
-			for (i = 0; i < ARRAY_SIZE(check_err); i++) {
-				if (check_err[i].err_val == (1 & (reg_val>>check_err[i].bit))) {
-					offset = strlen(info);
-					scnprintf(info + offset, sizeof(info) - offset - 1, "%s,", check_err[i].info);
-				}
-			}
-
-			offset = strlen(info);
-			scnprintf(info + offset, sizeof(info) - offset - 1, "regs:(");
-			if (aw882xx->aw_pa && (PID_1852_ID == aw882xx->aw_pa->chip_id)) {
-				for (i = 0; i < sizeof(fb_regs_aw88264); i++) {
-					ret = aw882xx_i2c_read(aw882xx, fb_regs_aw88264[i], &reg_val);
-					if (ret < 0) {
-						break;
-					} else {
-						offset = strlen(info);
-						scnprintf(info + offset, sizeof(info) - offset - 1, "%x,", reg_val);
-					}
-				}
-			} else {
-				for (i = 0; i < sizeof(fb_regs_aw88265); i++) {
-					ret = aw882xx_i2c_read(aw882xx, fb_regs_aw88265[i], &reg_val);
-					if (ret < 0) {
-						break;
-					} else {
-						offset = strlen(info);
-						scnprintf(info + offset, sizeof(info) - offset - 1, "%x,", reg_val);
-					}
-				}
-			}
-			offset = strlen(info);
-			scnprintf(info + offset, sizeof(info) - offset - 1, ")");
-		}
-	}
-
-	/* feedback the check error */
-	offset = strlen(info);
-	if ((offset > 0) && (offset < MM_KEVENT_MAX_PAYLOAD_SIZE)) {
-		scnprintf(fd_buf, sizeof(fd_buf) - 1, "payload@@%s", info);
-		mm_fb_audio_kevent_named(OPLUS_AUDIO_EVENTID_SMARTPA_ERR,
-				MM_FB_KEY_RATELIMIT_5MIN, fd_buf);
-		aw882xx->last_fb = ktime_get();
-		aw_dev_info(aw882xx->dev, "fd_buf=%s", fd_buf);
-	}
-
-	return 1;
-}
-
-static int aw882xx_check_speaker_status(struct aw882xx *aw882xx)
-{
-	char fd_buf[MM_KEVENT_MAX_PAYLOAD_SIZE] = {0};
-	int32_t re = 0;
-	int32_t te = 0;
-	int32_t ret = 0;
-
-	if ((aw882xx->last_fb !=0)  && ktime_before(ktime_get(), ktime_add_ms(aw882xx->last_fb, MM_FB_KEY_RATELIMIT_1MIN))) {
-		return 0;
-	}
-
-	ret = aw_dsp_read_st(aw882xx->aw_pa, &re, &te);
-	if (ret) {
-		scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-				"payload@@AW882xx SPK%u:read data from adsp error, ret=%d,", \
-				aw882xx->index + 1, ret);
-	} else {
-		switch (re) {
-		case RE_ERR_IV_OR_MEC_DISABLE:
-			scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-					"payload@@AW882xx SPK%u:IV or MEC channel disable, re=%d, te=%d", \
-					aw882xx->index + 1, re, te);
-			break;
-		case RE_ERR_NOT_WORK:
-			scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-					"payload@@AW882xx SPK%u:equivalent chip not working, re=%d, te=%d", \
-					aw882xx->index + 1, re, te);
-			break;
-		case RE_ERR_IV_ERR:
-			scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-					"payload@@AW882xx SPK%u:IV data error(no tx or MEC not open), re=%d, te=%d", \
-					aw882xx->index + 1, re, te);
-			break;
-		case RE_ERR_OPEN:
-			scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-					"payload@@AW882xx SPK%u:speaker open circuit, re=%d, te=%d", \
-					aw882xx->index + 1, re, te);
-			break;
-		default:
-			if ((re > RE_ERR_SHORT_MIN) && (re < RE_ERR_SHORT_MAX)) {
-				scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-						"payload@@AW882xx SPK%u:speaker short circuit, re=%d, te=%d", \
-						aw882xx->index + 1, re, te);
-			} else if ((re < RE_NORMAL_MIN) || (re > RE_NORMAL_MAX)) {
-				scnprintf(fd_buf, sizeof(fd_buf) - 1, \
-						"payload@@AW882xx SPK%u:speaker R0 out of range(%d, %d), re=%d, te=%d", \
-						aw882xx->index + 1, RE_NORMAL_MIN, RE_NORMAL_MAX, re, te);
-			}
-			aw_dev_info(aw882xx->dev, "AW882xx SPK%u: re=%d, te=%d", \
-					aw882xx->index + 1, re, te);
-			break;
-		}
-	}
-
-	if (strlen(fd_buf) > 0) {
-		mm_fb_audio_kevent_named(OPLUS_AUDIO_EVENTID_SPK_ERR, MM_FB_KEY_RATELIMIT_5MIN, fd_buf);
-		aw882xx->last_fb = ktime_get();
-		aw_dev_info(aw882xx->dev, "%s", fd_buf);
-	}
-
-	return ret;
-}
-
-static void aw882xx_check_work(struct work_struct *work)
-{
-	struct aw882xx *aw882xx = container_of(work, struct aw882xx, check_work.work);
-
-	aw_dev_info(aw882xx->dev, "enter");
-	if (g_chk_err) {
-		aw882xx_check_speaker_status(aw882xx);
-	}
-}
-
-static int aw882xx_set_check_feedback(struct snd_kcontrol *kcontrol,
-				   struct snd_ctl_elem_value *ucontrol)
-{
-	aw_snd_soc_codec_t *codec =
-		aw_componet_codec_ops.kcontrol_codec(kcontrol);
-	struct aw882xx *aw882xx =
-		aw_componet_codec_ops.codec_get_drvdata(codec);
-	int need_chk = ucontrol->value.integer.value[0];
-
-	aw_pr_info("%d", need_chk);
-	g_chk_err = need_chk;
-	if (!g_chk_err) {
-		cancel_delayed_work_sync(&aw882xx->check_work);
-	}
-
-	return 0;
-}
-
-static int aw882xx_get_check_feedback(struct snd_kcontrol *kcontrol,
-						struct snd_ctl_elem_value *ucontrol)
-{
-	ucontrol->value.integer.value[0] = g_chk_err;
-	aw_pr_info("%d", g_chk_err);
-
-	return 0;
-}
-
-static char const *aw882xx_check_feedback_text[] = {"Off", "On"};
-static const struct soc_enum aw882xx_check_feedback_enum =
-	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(aw882xx_check_feedback_text), aw882xx_check_feedback_text);
-
-static const struct snd_kcontrol_new aw882xx_check_feedback[] = {
-	SOC_ENUM_EXT("AW_CHECK_FEEDBACK", aw882xx_check_feedback_enum,
-			   aw882xx_get_check_feedback, aw882xx_set_check_feedback),
-};
-#endif /*OPLUS_FEATURE_MM_FEEDBACK*/
-
 static int aw882xx_mute(struct snd_soc_dai *dai, int mute, int stream)
 {
 	int ret = 0;
@@ -649,16 +415,6 @@ static int aw882xx_mute(struct snd_soc_dai *dai, int mute, int stream)
 		aw_componet_codec_ops.codec_get_drvdata(codec);
 
 	aw_dev_info(aw882xx->dev, "mute state=%d", mute);
-
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-	if (mute) {
-		if (g_chk_err) {
-			aw882xx_check_status_reg(aw882xx);
-			g_chk_err = false;
-		}
-		cancel_delayed_work_sync(&aw882xx->check_work);
-	}
-#endif /*CONFIG_OPLUS_FEATURE_MM_FEEDBACK*/
 
 	if (stream != SNDRV_PCM_STREAM_PLAYBACK) {
 		aw_dev_info(aw882xx->dev, "capture");
@@ -686,13 +442,6 @@ static int aw882xx_mute(struct snd_soc_dai *dai, int mute, int stream)
 #else /* OPLUS_ARCH_EXTENDS */
 		aw882xx_start_pa(aw882xx);
 #endif /* OPLUS_ARCH_EXTENDS */
-
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-		if (g_chk_err) {
-			queue_delayed_work(aw882xx->work_queue,
-					&aw882xx->check_work, AW882XX_CHECK_WORK_DELAY);
-		}
-#endif /*CONFIG_OPLUS_FEATURE_MM_FEEDBACK*/
 
 #ifndef OPLUS_ARCH_EXTENDS
 		if (aw882xx->index == 0) {
@@ -858,14 +607,6 @@ static int aw882xx_switch_set(struct snd_kcontrol *kcontrol,
 
 	if (aw882xx->pstream) {
 		if (ucontrol->value.integer.value[0] == 0) {
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-/*MTK platform set aw_dev_0_switch before pcm close, so check reg here rather than aw882xx_mute */
-			if (g_chk_err) {
-				aw882xx_check_status_reg(aw882xx);
-				g_chk_err = false;
-			}
-			cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 			cancel_delayed_work_sync(&aw882xx->dc_work);
 			cancel_delayed_work_sync(&aw882xx->start_work);
 			mutex_lock(&aw882xx->lock);
@@ -874,9 +615,6 @@ static int aw882xx_switch_set(struct snd_kcontrol *kcontrol,
 			mutex_unlock(&aw882xx->lock);
 			aw_dev_info(aw882xx->dev, "stop pa");
 		} else {
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-			cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 			cancel_delayed_work_sync(&aw882xx->start_work);
 			mutex_lock(&aw882xx->lock);
 			aw882xx->allow_pw = true;
@@ -1110,10 +848,6 @@ static void aw882xx_dc_prot_work(struct work_struct *work)
 		if (dev_status) {
 			dc_status = aw_dev_dc_status(aw882xx->aw_pa);
 			if (dc_status > 0) {
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-				g_chk_err = false;
-				cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 				cancel_delayed_work_sync(&aw882xx->start_work);
 				mutex_lock(&aw882xx->lock);
 				aw_device_stop(aw882xx->aw_pa);
@@ -1579,10 +1313,6 @@ static int aw882xx_spk_l_mute_ctrl_put(struct snd_kcontrol *kcontrol,
 	if (aw882xx->pstream) {
 		if (ucontrol->value.integer.value[0] == 1) {
 			aw_dev_info(aw882xx->dev, "AW_L operating, setting mute state...");
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-			g_chk_err = false;
-			cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 			cancel_delayed_work_sync(&aw882xx->dc_work);
 			cancel_delayed_work_sync(&aw882xx->start_work);
 			mutex_lock(&aw882xx->lock);
@@ -1648,10 +1378,6 @@ static int aw882xx_spk_r_mute_ctrl_put(struct snd_kcontrol *kcontrol,
 	if (aw882xx->pstream) {
 		if (ucontrol->value.integer.value[0] == 1) {
 			aw_dev_info(aw882xx->dev, "AW_R operating, setting mute state...");
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-			g_chk_err = false;
-			cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 			cancel_delayed_work_sync(&aw882xx->dc_work);
 			cancel_delayed_work_sync(&aw882xx->start_work);
 			mutex_lock(&aw882xx->lock);
@@ -1706,10 +1432,6 @@ static int aw882xx_spk_reboot_ctrl_put(struct snd_kcontrol *kcontrol,
 	if (aw882xx->pstream) {
 		if (ucontrol->value.integer.value[0] == 1) {
 			aw_dev_info(aw882xx->dev, "AW rebooting, setting mute state...");
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-			g_chk_err = false;
-			cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 			cancel_delayed_work_sync(&aw882xx->dc_work);
 			cancel_delayed_work_sync(&aw882xx->start_work);
 			mutex_lock(&aw882xx->lock);
@@ -1776,11 +1498,6 @@ static void aw882xx_add_codec_controls(struct aw882xx *aw882xx)
 	if (aw882xx->aw_pa->spin_desc.aw_spin_kcontrol_st == AW_SPIN_KCONTROL_ENABLE)
 		aw_componet_codec_ops.add_codec_controls(aw882xx->codec,
 				aw882xx_spin_control, ARRAY_SIZE(aw882xx_spin_control));
-
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-	aw_componet_codec_ops.add_codec_controls(aw882xx->codec,
-			&aw882xx_check_feedback[0], ARRAY_SIZE(aw882xx_check_feedback));
-#endif
 }
 
 #ifdef OPLUS_ARCH_EXTENDS
@@ -1946,11 +1663,6 @@ static int aw882xx_codec_probe(aw_snd_soc_codec_t *aw_codec)
 	INIT_DELAYED_WORK(&aw882xx->interrupt_work, aw882xx_interrupt_work);
 	INIT_DELAYED_WORK(&aw882xx->dc_work, aw882xx_dc_prot_work);
 	INIT_DELAYED_WORK(&aw882xx->fw_work, aw882xx_request_firmware);
-
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-	aw882xx->last_fb = 0;
-	INIT_DELAYED_WORK(&aw882xx->check_work, aw882xx_check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 
 	aw882xx->codec = aw_codec;
 
@@ -3057,10 +2769,6 @@ static void aw882xx_i2c_shutdown(struct i2c_client *i2c)
 {
 	struct aw882xx *aw882xx = i2c_get_clientdata(i2c);
 
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-	g_chk_err = false;
-	cancel_delayed_work_sync(&aw882xx->check_work);
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 	aw_dev_info(aw882xx->dev, "enter");
 	mutex_lock(&aw882xx->lock);
 	aw_device_stop(aw882xx->aw_pa);

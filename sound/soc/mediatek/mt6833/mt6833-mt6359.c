@@ -373,15 +373,6 @@ static const struct snd_soc_dapm_route mt6833_mt6359_routes[] = {
 #endif /*OPLUS_BUG_COMPATIBILITY*/
 };
 
-#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-#define HAL_FEEDBACK_MAX_BYTES         (256)
-extern int hal_feedback_config_get(struct snd_kcontrol *kcontrol,
-			unsigned int __user *bytes,
-			unsigned int size);
-extern int hal_feedback_config_set(struct snd_kcontrol *kcontrol,
-			const unsigned int __user *bytes,
-			unsigned int size);
-#endif  /*CONFIG_OPLUS_FEATURE_MM_FEEDBACK*/
 
 static const struct snd_kcontrol_new mt6833_mt6359_controls[] = {
 	SOC_DAPM_PIN_SWITCH(EXT_SPK_AMP_W_NAME),
@@ -408,11 +399,6 @@ static const struct snd_kcontrol_new mt6833_mt6359_controls[] = {
 		.get = mt6853_audio_extern_config_get
 	},
 	#endif //OPLUS_BUG_COMPATIBILITY
-	#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-	SND_SOC_BYTES_TLV("HAL FEEDBACK",
-			  HAL_FEEDBACK_MAX_BYTES,
-			  hal_feedback_config_get, hal_feedback_config_set),
-	#endif //CONFIG_OPLUS_FEATURE_MM_FEEDBACK
 };
 
 /*

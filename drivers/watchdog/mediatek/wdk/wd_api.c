@@ -707,10 +707,6 @@ void arch_reset(char mode, const char *cmd)
 		oppo_rtc_mark_safe();
 	} else if (cmd && !strcmp(cmd, "edl")) {
 		oppo_rtc_mark_edl();
-#ifdef OPLUS_FEATURE_AGINGTEST
-	} else if (cmd && (!strcmp(cmd, "sblmemtest") || !strcmp(cmd, "usermemaging"))) {
-		oppo_rtc_mark_agingtest();
-#endif /*OPLUS_FEATURE_AGINGTEST */
 #endif
 	} else {
 		reboot = WD_SW_RESET_BYPASS_PWR_KEY;

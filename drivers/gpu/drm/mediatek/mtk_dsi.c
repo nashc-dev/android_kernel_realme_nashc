@@ -53,9 +53,6 @@
 #include "mtk_drm_fbdev.h"
 #include "mtk_fbconfig_kdebug.h"
 /* ********* end Panel Master *********** */
-#ifdef OPLUS_BUG_STABILITY
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
-#endif
 
 #include <asm/arch_timer.h>
 /* ********** bridge ic ***************** */
@@ -1895,9 +1892,6 @@ static irqreturn_t mtk_dsi_irq_status(int irq, void *dev_id)
 							dsi->encoder.crtc);
 					}
 					dsi_underrun_trigger = 0;
-					#ifdef OPLUS_BUG_STABILITY
-					mm_fb_display_kevent("DisplayDriverID@@506$$", MM_FB_KEY_RATELIMIT_1H, "underrun");
-					#endif
 				}
 			}
 
@@ -4148,19 +4142,6 @@ int mtk_dsi_esd_cmp(struct mtk_ddp_comp *comp, void *handle, void *slot)
 			DDPPR_ERR("[DSI]cmp fail:read(0x%x)!=expect(0x%x)\n",
 				  chk_val, lcm_esd_tb->para_list[0]);
 			ret = -1;
-			#ifdef OPLUS_BUG_STABILITY
-			if (ret < 0) {
-				char payload[200] = "";
-				int cnt = 0;
-
-				cnt += scnprintf(payload + cnt, sizeof(payload) - cnt, "DisplayDriverID@@507$$");
-				cnt += scnprintf(payload + cnt, sizeof(payload) - cnt, "ESD:");
-				cnt += scnprintf(payload + cnt, sizeof(payload) - cnt, "%02x = %02x",
-					lcm_esd_tb->cmd,lcm_esd_tb->para_list[0]);
-				DDPPR_ERR("ESD check failed: %s\n", payload);
-				mm_fb_display_kevent(payload, MM_FB_KEY_RATELIMIT_1H, "ESD check failed");
-			}
-			#endif
 			break;
 		}
 		#ifdef OPLUS_BUG_STABILITY

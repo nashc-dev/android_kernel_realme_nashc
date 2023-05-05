@@ -19,9 +19,6 @@
 #include "adsp_platform_driver.h"
 #include "adsp_excep.h"
 #include "adsp_logger.h"
-#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
-#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 
 #define ADSP_MISC_EXTRA_SIZE    0x400 //1KB
 #define ADSP_MISC_BUF_SIZE      0x10000 //64KB
@@ -220,10 +217,6 @@ static void adsp_exception_dump(struct adsp_exception_control *ctrl)
 			      coredump->assert_log);
 	}
 	pr_info("%s", detail);
-#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-		mm_fb_audio_kevent_named(OPLUS_AUDIO_EVENTID_ADSP_CRASH, \
-					MM_FB_KEY_RATELIMIT_5MIN, "FieldData@@%s$$detailData@@audio$$module@@adsp", coredump->assert_log);
-#endif //CONFIG_OPLUS_FEATURE_MM_FEEDBACK
 	/* adsp aed api, only detail information available*/
 	aed_common_exception_api("adsp", (const int *)coredump, coredump_size,
 				 NULL, 0, detail, db_opt);
@@ -279,10 +272,6 @@ void adsp_aed_worker(struct work_struct *ws)
 					 "[ADSP]",
 					 "ASSERT: ADSP DEAD! Recovery Fail");
 
-#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-	mm_fb_audio_kevent_named(OPLUS_AUDIO_EVENTID_ADSP_RECOVERY_FAIL, \
-		MM_FB_KEY_RATELIMIT_5MIN, "payload@@ADSP DEAD! Recovery Fail,ret=%d", ret);
-#endif //CONFIG_OPLUS_FEATURE_MM_FEEDBACK
 		/* BUG_ON(1); */
 	}
 

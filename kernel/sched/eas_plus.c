@@ -54,9 +54,6 @@ static int share_buck[3] = {0, 1, 2};
 
 #define CCI_ID (arch_get_nr_clusters())
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-#include <linux/sched_assist/sched_assist_common.h>
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 
 static void
 update_system_overutilized(struct lb_env *env)
@@ -817,10 +814,6 @@ static unsigned int aggressive_idle_pull(int this_cpu)
 	 */
 	if (hmp_cpu_is_slowest(this_cpu)) {
 		hmp_slowest_idle_prefer_pull(this_cpu, &p, &target);
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_SCHED_WALT)
-		if (p && sysctl_sched_assist_enabled && sched_assist_scene(SA_ANIM) && is_heavy_ux_task(p) && test_ux_task_cpu(task_cpu(p)))
-			goto done;
-#endif
 		if (p) {
 			trace_sched_hmp_migrate(p, this_cpu, 0x10);
 			moved = migrate_runnable_task(p, this_cpu, target);
@@ -829,10 +822,6 @@ static unsigned int aggressive_idle_pull(int this_cpu)
 		}
 	} else {
 		hmp_fastest_idle_prefer_pull(this_cpu, &p, &target);
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_SCHED_WALT)
-		if (p && sysctl_sched_assist_enabled &&  sched_assist_scene(SA_ANIM) && is_heavy_ux_task(p) && test_ux_task_cpu(task_cpu(p)))
-			goto done;
-#endif
 		if (p) {
 			trace_sched_hmp_migrate(p, this_cpu, 0x10);
 			moved = migrate_runnable_task(p, this_cpu, target);
@@ -1929,11 +1918,6 @@ void task_check_for_rotation(struct rq *src_rq)
 		if (rq->nr_running > 1)
 			continue;
 
-#if defined (CONFIG_SCHED_WALT) && defined (OPLUS_FEATURE_SCHED_ASSIST)
-		if (sysctl_sched_assist_enabled && (sched_assist_scene(SA_SLIDE) || sched_assist_scene(SA_LAUNCHER_SI) || sched_assist_scene(SA_INPUT) || sched_assist_scene(SA_ANIM))
-		&& (is_heavy_ux_task(rq->curr) || is_sf(rq->curr)))
-			continue;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 		run = wc - rq->curr->last_enqueued_ts;
 
 		if (run < TASK_ROTATION_THRESHOLD_NS)

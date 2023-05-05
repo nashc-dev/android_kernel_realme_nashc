@@ -11,9 +11,6 @@ extern int	     sysctl_hung_task_check_count;
 extern unsigned int  sysctl_hung_task_panic;
 extern unsigned long sysctl_hung_task_timeout_secs;
 extern int sysctl_hung_task_warnings;
-#ifdef CONFIG_OPLUS_FEATURE_HUNG_TASK_ENHANCE
-extern int sysctl_hung_task_selective_monitoring;
-#endif
 extern int proc_dohung_task_timeout_secs(struct ctl_table *table, int write,
 					 void __user *buffer,
 					 size_t *lenp, loff_t *ppos);
@@ -117,11 +114,5 @@ extern int sysctl_schedstats(struct ctl_table *table, int write,
 				 void __user *buffer, size_t *lenp,
 				 loff_t *ppos);
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-extern int sysctl_sched_assist_scene_handler(struct ctl_table *table, int write,
-	void __user *buffer, size_t *lenp, loff_t *ppos);
-extern int sysctl_sched_assist_input_boost_ctrl_handler(struct ctl_table *table, int write,
-	void __user *buffer, size_t *lenp, loff_t *ppos);
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 
 #endif /* _LINUX_SCHED_SYSCTL_H */

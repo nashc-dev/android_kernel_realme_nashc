@@ -14,4 +14,3 @@
 snd-audio-extend-objs := audio_extend_drv.o
 obj-y += snd-audio-extend.o
 snd-hal-feedback-objs := hal_feedback.o
-obj-$(CONFIG_OPLUS_FEATURE_MM_FEEDBACK) += snd-hal-feedback.o

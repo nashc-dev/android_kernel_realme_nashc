@@ -14,7 +14,6 @@
 #include <linux/fb.h>
 #include <linux/time.h>
 #include <linux/timekeeping.h>
-#include <linux/oppo_mm_kevent_fb.h>
 #include <linux/delay.h>
 #include <soc/oppo/oppo_project.h>
 #include "ddp_dsi.h"

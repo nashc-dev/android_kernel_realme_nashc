@@ -913,19 +913,6 @@ SYSDVT_OBJS += $(SYSDVT_DIR)dvt_dmashdl.o
 endif
 endif
 
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-#//XiaZijian@CONNECTIVITY.WIFI.BASIC.26106 2021/03/18 , add for oplus wfd
-ifeq ($(CONFIG_OPLUS_FEATURE_WIFI_OPLUSWFD), m)
-ccflags-y += -DOPLUS_FEATURE_WIFI_OPLUSWFD=1
-else ifeq ($(CONFIG_OPLUS_FEATURE_WIFI_OPLUSWFD), y)
-ccflags-y += -DOPLUS_FEATURE_WIFI_OPLUSWFD=1
-else ifeq ($(CONFIG_OPLUS_FEATURE_WIFI_OPLUSWFD), n)
-ccflags-y += -UOPLUS_FEATURE_WIFI_OPLUSWFD
-endif
-
-OPLUS_WFD_OBJS += oplus_wfd/wlan_oplus_wfd.o
-#endif /* OPLUS_FEATURE_WIFI_OPLUSWFD */
-
 # ---------------------------------------------------
 # Service git List
 # ---------------------------------------------------
@@ -963,11 +950,6 @@ $(MODULE_NAME)-objs  += $(CHIPS_OBJS)
 $(MODULE_NAME)-objs  += $(SYSDVT_OBJS)
 $(MODULE_NAME)-objs  += $(NAN_OBJS)
 $(MODULE_NAME)-objs  += $(NAN_SEC_OBJS)
-
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-#//XiaZijian@CONNECTIVITY.WIFI.BASIC.26106 2021/03/18 , add for oplus wfd
-$(MODULE_NAME)-objs  += $(OPLUS_WFD_OBJS)
-#endif /* OPLUS_FEATURE_WIFI_OPLUSWFD */
 
 ifneq ($(findstring UT_TEST_MODE,$(MTK_COMBO_CHIP)),)
 include $(src)/test/ut.make

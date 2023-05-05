@@ -181,9 +181,6 @@ enum rtc_spare_enum {
 	RTC_SENSOR_CAUSE_PANIC,
 #endif /* OPLUS_BUG_STABILITY */
 	RTC_SAFE_BOOT,
-#ifdef OPLUS_FEATURE_AGINGTEST
-	RTC_AGINGTEST_BOOT,
-#endif /*OPLUS_FEATURE_AGINGTEST */
 #ifdef OPLUS_BUG_STABILITY
 	RTC_EDL_BOOT,
 #endif /* OPLUS_BUG_STABILITY */
@@ -231,9 +228,6 @@ u16 rtc_spare_reg[RTC_SPAR_NUM][3] = {
 #endif /* OPLUS_BUG_STABILITY */
 #ifdef OPLUS_BUG_STABILITY
 	{RTC_SPAR0, 0x1, 15},
-#ifdef OPLUS_FEATURE_AGINGTEST
-	{RTC_SPAR0, 0x01, 14},
-#endif /*OPLUS_FEATURE_AGINGTEST */
 	{RTC_AL_DOW, 0x1, 15},
 #endif /* OPLUS_BUG_STABILITY */
 };
@@ -785,17 +779,6 @@ void oppo_rtc_mark_sau(void)
 	spin_unlock_irqrestore(&rtc_misc->lock, flags);
 }
 
-#ifdef OPLUS_FEATURE_AGINGTEST
-void oppo_rtc_mark_agingtest(void)
-{
-	unsigned long flags;
-
-	pr_notice("rtc_mark_agingtest\n");
-	spin_lock_irqsave(&rtc_misc->lock, flags);
-	mtk_rtc_set_spare_register(RTC_AGINGTEST_BOOT, 0x01);
-	spin_unlock_irqrestore(&rtc_misc->lock, flags);
-}
-#endif /*OPLUS_FEATURE_AGINGTEST */
 
 void oppo_rtc_mark_factory(void)
 {

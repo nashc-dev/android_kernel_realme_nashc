@@ -38,11 +38,6 @@
 #endif /*CONFIG_MACH_MT6768*/
 //#endif /*OPLUS_FEATURE_TP_BASIC*/
 
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_THEIA)
-#include <soc/oplus/system/oplus_bscheck.h>
-#include <soc/oplus/system/oplus_brightscreen_check.h>
-#endif
-
 #define KPD_NAME	"mtk-kpd"
 
 #ifdef CONFIG_LONG_PRESS_MODE_EN
@@ -515,14 +510,6 @@ void kpd_pwrkey_pmic_handler(unsigned long pressed)
 		return;
 	}
 	kpd_pmic_pwrkey_hal(pressed);
-
-	#if IS_ENABLED(CONFIG_OPLUS_FEATURE_THEIA)
-	if(pressed){
-		//we should canel per work
-		black_screen_timer_restart();
-		bright_screen_timer_restart();
-	}
-	#endif
 }
 #endif
 

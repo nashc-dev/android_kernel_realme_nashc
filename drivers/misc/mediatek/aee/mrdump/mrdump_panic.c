@@ -38,11 +38,6 @@
 #include <linux/arm-smccc.h>
 #include <uapi/linux/psci.h>
 
-#ifdef OPLUS_FEATURE_PERFORMANCE
-//ZuoTong@ANDROID.PERFORMANCE, 2020/06/28,Add for flushing device cache before goto dump mode!
-extern bool is_triggering_panic;
-extern void flush_cache_on_panic(void);
-#endif  /*OPLUS_FEATURE_PERFORMANCE*/
 static char mrdump_lk[12];
 bool mrdump_ddr_reserve_ready;
 
@@ -151,47 +146,12 @@ __weak void aee_wdt_zap_locks(void)
 	pr_notice("%s:weak function\n", __func__);
 }
 
-#ifdef OPLUS_FEATURE_PHOENIX
-extern void deal_fatal_err(void);
-extern int kernel_panic_happened;
-extern int hwt_happened;
-#endif /* OPLUS_FEATURE_PHOENIX */
-
-#ifdef CONFIG_OPLUS_FEATURE_PANIC_FLUSH
-extern int panic_flush_device_cache(int timeout);
-#endif
-
 int mrdump_common_die(int fiq_step, int reboot_reason, const char *msg,
 		      struct pt_regs *regs)
 {
 
-#ifdef OPLUS_FEATURE_PHOENIX
-	if((AEE_REBOOT_MODE_KERNEL_OOPS == reboot_reason || AEE_REBOOT_MODE_KERNEL_PANIC == reboot_reason)
-		&& !kernel_panic_happened)
-	{
-		kernel_panic_happened = 1;
-		deal_fatal_err();
-	}
-	else if (AEE_REBOOT_MODE_WDT == reboot_reason && !hwt_happened)
-	{
-		hwt_happened = 1;
-		deal_fatal_err();
-	}
-#endif /* OPLUS_FEATURE_PHOENIX */
 
-#ifdef CONFIG_OPLUS_FEATURE_PANIC_FLUSH
-	panic_flush_device_cache(2000);
-#endif
 
-#ifdef OPLUS_FEATURE_PERFORMANCE
-//ZuoTong@ANDROID.PERFORMANCE, 2020/06/28,Add for flushing device cache before go to dump mode!
-    if(!is_triggering_panic)
-    {
-        is_triggering_panic = true;
-        pr_notice("is_triggering_panic : true\n");
-        flush_cache_on_panic();
-    }
-#endif // OPLUS_FEATURE_PERFORMANCE
 	bust_spinlocks(1);
 	aee_disable_api();
 

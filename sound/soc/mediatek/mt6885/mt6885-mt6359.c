@@ -156,15 +156,6 @@ static const struct snd_soc_dapm_route mt6885_mt6359_routes[] = {
 	{EXT_SPK_AMP_W_NAME, NULL, "Headphone R Ext Spk Amp"},
 };
 
-#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-#define HAL_FEEDBACK_MAX_BYTES         (256)
-extern int hal_feedback_config_get(struct snd_kcontrol *kcontrol,
-			unsigned int __user *bytes,
-			unsigned int size);
-extern int hal_feedback_config_set(struct snd_kcontrol *kcontrol,
-			const unsigned int __user *bytes,
-			unsigned int size);
-#endif  /*CONFIG_OPLUS_FEATURE_MM_FEEDBACK*/
 
 static const struct snd_kcontrol_new mt6885_mt6359_controls[] = {
 	SOC_DAPM_PIN_SWITCH(EXT_SPK_AMP_W_NAME),
@@ -174,11 +165,6 @@ static const struct snd_kcontrol_new mt6885_mt6359_controls[] = {
 		     mt6885_spk_i2s_out_type_get, NULL),
 	SOC_ENUM_EXT("MTK_SPK_I2S_IN_TYPE_GET", mt6885_spk_type_enum[1],
 		     mt6885_spk_i2s_in_type_get, NULL),
-	#ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
-	SND_SOC_BYTES_TLV("HAL FEEDBACK",
-			  HAL_FEEDBACK_MAX_BYTES,
-			  hal_feedback_config_get, hal_feedback_config_set),
-	#endif //CONFIG_OPLUS_FEATURE_MM_FEEDBACK
 #ifdef OPLUS_ARCH_EXTENDS
 #ifdef CONFIG_SND_SOC_TFA_HAPTIC
 	SOC_ENUM_EXT("TFA_HAPTIC_RING_SYNC", tfa_haptic_type_enum[0],

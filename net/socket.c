@@ -108,10 +108,6 @@
 #include <linux/atalk.h>
 #include <net/busy_poll.h>
 #include <linux/errqueue.h>
-//#ifdef OPLUS_FEATURE_NWPOWER_NETCONTROLLER
-//PengHao@NETWORK.POWER.26376, 2020/04/27, add for oplus net controller
-#include <net/oplus_nwpower.h>
-//#endif /* OPLUS_FEATURE_NWPOWER_NETCONTROLLER */
 
 #ifdef CONFIG_NET_RX_BUSY_POLL
 unsigned int sysctl_net_busy_read __read_mostly;
@@ -429,12 +425,6 @@ struct file *sock_alloc_file(struct socket *sock, int flags, const char *dname)
 	sock->file = file;
 	file->f_flags = O_RDWR | (flags & O_NONBLOCK);
 	file->private_data = sock;
-
-	//#ifdef OPLUS_FEATURE_NWPOWER
-	if (sock->sk) {
-		sock->sk->sk_oplus_pid = current->tgid;
-	}
-	//#endif /* OPLUS_FEATURE_NWPOWER */
 
 	return file;
 }

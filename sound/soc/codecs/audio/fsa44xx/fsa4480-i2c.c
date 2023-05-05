@@ -14,8 +14,6 @@
 #include <linux/regulator/consumer.h>
 //#endif /*OPLUS_ARCH_EXTENDS*/
 
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
-
 #include "fsa4480-i2c.h"
 #include "../../../../drivers/misc/mediatek/typec/tcpc/inc/tcpm.h"
 
@@ -111,7 +109,6 @@ static void fsa4480_usbc_digit_work_fn(struct work_struct *work)
 	struct fsa4480_priv *fsa_priv =
 		container_of(work, struct fsa4480_priv, usbc_digit_work);
 	unsigned int reg04,reg05,reg06,reg07;
-	char buf[MM_KEVENT_MAX_PAYLOAD_SIZE] = {0};
 	struct device *dev;
 
 	if (!fsa_priv) {
@@ -132,11 +129,6 @@ static void fsa4480_usbc_digit_work_fn(struct work_struct *work)
 	dev_info(dev, "%s: is not audio jack,reg04:%02x,reg05:%02x,reg06:%02x,reg07:%02x\n",
 	__func__, reg04, reg05, reg06, reg07);
 	if ((reg04 != 0x98) || (reg05 != 0x18) || (reg06 != 0x05) || (reg07 != 0x00)) {
-		dev_info(dev, "%s: error status\n",__func__);
-		scnprintf(buf, sizeof(buf) - 1, "func@@%s$$typec_mode@@%d,%d$$regs@@%02x,%02x,%02x,%02x", \
-			__func__, fsa_priv->old_state, fsa_priv->new_state,reg04,reg05,reg06,reg07);
-		upload_mm_fb_kevent_to_atlas_limit(OPLUS_AUDIO_EVENTID_HEADSET_DET, buf, MM_FB_KEY_RATELIMIT_1MIN);
-
 		if (fsa_priv->new_state == TYPEC_UNATTACHED) {
 			regmap_write(fsa_priv->regmap, FSA4480_RESET, 0x01);
 			usleep_range(1000, 1005);

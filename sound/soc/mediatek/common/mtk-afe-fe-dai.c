@@ -58,7 +58,6 @@
 
 //#ifdef OPLUS_ARCH_EXTENDS
 /*Jianqing.Liao@AudioDriver, 2021/07/28, add for memif reg access error address */
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
 #define OPLUS_AUDIO_EVENTID_AFE_ERROR  (10026)
 //#endif
 
@@ -803,7 +802,6 @@ int mtk_memif_set_addr(struct mtk_base_afe *afe, int id,
 //#ifdef OPLUS_ARCH_EXTENDS
 /*Jianqing.Liao@AudioDriver, 2021/07/28, add for memif reg access error address */
 	unsigned int value = 0;
-	char buf[MM_KEVENT_MAX_PAYLOAD_SIZE] = {0};
 
 	/* check the memif already disable */
 	regmap_read(afe->regmap, memif->data->enable_reg, &value);
@@ -811,9 +809,6 @@ int mtk_memif_set_addr(struct mtk_base_afe *afe, int id,
 		mtk_memif_set_disable(afe, id);
 		pr_info("%s memif[%d] is enabled before set_addr, en:0x%x\n",
 			__func__, id, value);
-		scnprintf(buf, sizeof(buf) - 1, "$$memif_id@@%d$regs@@%x", \
-			id, value);
-		mm_fb_audio_kevent_named(OPLUS_AUDIO_EVENTID_AFE_ERROR, MM_FB_KEY_RATELIMIT_1MIN, buf);
 	}
 //#endif
 

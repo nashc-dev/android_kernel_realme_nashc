@@ -706,9 +706,6 @@ config NONLINEAR_FREQ_CTL
 	  loading tracking/opp calculation will be affected.
 	  If unsure, say N.
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-source "kernel/sched_assist/Kconfig"
-#endif
 endmenu
 
 menu "FAIR Scheuler tunables"

@@ -96,11 +96,6 @@
 #include "fw_log_wifi.h"
 #endif
 
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-//XiaZijian@CONNECTIVITY.WIFI.BASIC.26106,20200703
-void oplus_wfd_set_hdd_ctx(struct wireless_dev *hdd_ctx);
-void oplus_register_oplus_wfd_wlan_ops_mtk(void);
-#endif
 /*******************************************************************************
  *                              C O N S T A N T S
  *******************************************************************************
@@ -3105,11 +3100,6 @@ static void wlanDestroyAllWdev(void)
 #if CFG_ENABLE_WIFI_DIRECT
 	int i = 0;
 #endif
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-    //XiaZijian@CONNECTIVITY.WIFI.BASIC.26106,20200703
-    DBGLOG(INIT, INFO, "wlanDestroyAllWdev");
-    oplus_wfd_set_hdd_ctx(NULL);
-#endif
 
 	WIPHY_PRIV(wlanGetWiphy(), prGlueInfo);
 	kalMemFree(prGlueInfo, VIR_MEM_TYPE, sizeof(struct GLUE_INFO));
@@ -3508,10 +3498,6 @@ void wlanNetDestroy(struct wireless_dev *prWdev)
 	struct GLUE_INFO *prGlueInfo = NULL;
 
 	ASSERT(prWdev);
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-    //XiaZijian@CONNECTIVITY.WIFI.BASIC.26106,20200703
-    oplus_wfd_set_hdd_ctx(NULL);
-#endif
 	if (!prWdev) {
 		DBGLOG(INIT, ERROR, "The device context is NULL\n");
 		return;
@@ -5942,13 +5928,6 @@ static int32_t wlanProbe(void *pvData, void *pvDriverData)
 			break;
 		}
 	}
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-//XiaZijian@CONNECTIVITY.WIFI.BASIC.26106,20200703
-    if (i4Status == 0) {
-        oplus_wfd_set_hdd_ctx(gprWdev[0]);
-        oplus_register_oplus_wfd_wlan_ops_mtk();
-    }
-#endif
 	return i4Status;
 }				/* end of wlanProbe() */
 
@@ -6003,10 +5982,6 @@ static void wlanRemove(void)
 	uint8_t i;
 #endif
 	DBGLOG(INIT, INFO, "Remove wlan!\n");
-#ifdef OPLUS_FEATURE_WIFI_OPLUSWFD
-    //XiaZijian@CONNECTIVITY.WIFI.BASIC.26106,20200703
-    oplus_wfd_set_hdd_ctx(NULL);
-#endif
 	kalSetHalted(TRUE);
 
 	/*reset NVRAM State to ready for the next wifi-no*/

@@ -81,9 +81,6 @@
 #include "swpm_v1/mtk_swpm_interface.h"
 #endif
 
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-#include <linux/task_sched_info.h>
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 
 #ifdef CONFIG_MTK_CPU_MSSV
 extern unsigned int cpumssv_get_state(void);
@@ -423,9 +420,6 @@ int Ripi_cpu_dvfs_thread(void *data)
 						freqs.new, 0);
 				}
 #endif
-#if defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED)
-				update_freq_limit_info(p->mt_policy);
-#endif /* defined(OPLUS_FEATURE_TASK_CPUSTATS) && defined(CONFIG_OPLUS_SCHED) */
 				trace_cpu_frequency_limits(p->mt_policy->max,
 					p->mt_policy->min,
 					p->mt_policy->cpu);

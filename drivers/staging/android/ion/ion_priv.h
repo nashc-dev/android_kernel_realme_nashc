@@ -93,12 +93,6 @@ struct ion_buffer {
 #ifdef MTK_ION_DMABUF_SUPPORT
 	struct list_head attachments;
 #endif
-#if defined(OPLUS_FEATURE_MEMLEAK_DETECT) && defined(CONFIG_DUMP_TASKS_MEM)
-	struct task_struct *tsk;
-#endif
-#if defined(OPLUS_FEATURE_MEMLEAK_DETECT) && defined(CONFIG_MEMLEAK_DETECT_THREAD) && defined(CONFIG_SVELTE)
-	unsigned long jiffies;
-#endif
 };
 
 void ion_buffer_destroy(struct ion_buffer *buffer);
@@ -117,12 +111,7 @@ struct ion_device {
 	struct miscdevice dev;
 	struct rb_root buffers;
 	struct mutex buffer_lock; /* mutex */
-#ifdef OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK
-	struct rw_semaphore client_lock;
-	struct rw_semaphore heap_lock;
-#else /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 	struct rw_semaphore lock;
-#endif /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 	struct plist_head heaps;
 	long (*custom_ioctl)(struct ion_client *client, unsigned int cmd,
 			     unsigned long arg);
@@ -559,9 +548,6 @@ int ion_share_dma_buf_fd_nolock(struct ion_client *client,
 struct ion_handle *pass_to_user(struct ion_handle *handle);
 void user_ion_free_nolock(struct ion_client *client, struct ion_handle *handle);
 
-#ifdef CONFIG_OPLUS_ION_BOOSTPOOL
-inline is_allocator_svc(struct task_struct *tsk);
-#endif /* CONFIG_OPLUS_ION_BOOSTPOOL */
 struct ion_handle *__ion_alloc(struct ion_client *client, size_t len,
 			       size_t align, unsigned int heap_id_mask,
 			       unsigned int flags, bool grab_handle);

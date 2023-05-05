@@ -173,10 +173,6 @@ struct aw882xx {
 	struct delayed_work interrupt_work;
 	struct delayed_work dc_work;
 	struct delayed_work fw_work;
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
-	struct delayed_work check_work;
-	ktime_t last_fb;
-#endif /*CONFIG_OPLUS_FEATURE_MM_FEEDBACK*/
 
 #ifdef OPLUS_ARCH_EXTENDS
 	struct proc_dir_entry *dbg_dir;

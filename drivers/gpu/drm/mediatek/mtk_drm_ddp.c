@@ -20,9 +20,6 @@
 #include <linux/pm_runtime.h>
 #include <drm/drmP.h>
 #include <linux/soc/mediatek/mtk-cmdq.h>
-#ifdef OPLUS_BUG_STABILITY
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
-#endif
 
 #include "mtk_drm_ddp.h"
 #include "mtk_drm_crtc.h"
@@ -8317,9 +8314,6 @@ static int mtk_ddp_probe(struct platform_device *pdev)
 		DDPAEE("%s:%d, failed to request irq:%d ret:%d\n",
 				__func__, __LINE__,
 				irq, ret);
-		#ifdef OPLUS_BUG_STABILITY
-		mm_fb_display_kevent("DisplayDriverID@@504$$", MM_FB_KEY_RATELIMIT_1H, "mtk_ddp_probe failed to request irq:%d ret:%d", irq, ret);
-		#endif
 		return ret;
 	}
 

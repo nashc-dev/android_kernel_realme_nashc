@@ -468,17 +468,6 @@ void oppo_rtc_mark_factory(void)
 	spin_unlock_irqrestore(&rtc_lock, flags);
 }
 
-#ifdef OPLUS_FEATURE_AGINGTEST
-void oppo_rtc_mark_agingtest(void)
-{
-	unsigned long flags;
-
-	rtc_xinfo("rtc_mark_agingtest\n");
-	spin_lock_irqsave(&rtc_lock, flags);
-	hal_rtc_set_spare_register(RTC_AGINGTEST_BOOT, 0x01);
-	spin_unlock_irqrestore(&rtc_lock, flags);
-}
-#endif /*OPLUS_FEATURE_AGINGTEST */
 
 void oppo_rtc_mark_safe(void)
 {

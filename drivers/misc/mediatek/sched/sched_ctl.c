@@ -34,9 +34,6 @@
 #include "mtk_devinfo.h"
 #endif
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-#include <linux/sched_assist/sched_assist_common.h>
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 
 #define SCHED_HINT_THROTTLE_NSEC 10000000 /* 10ms for throttle */
 
@@ -408,8 +405,7 @@ err:
 late_initcall(sched_hint_init);
 
 #ifdef CONFIG_MTK_SCHED_BOOST
-//OPLUS_FEATURE_SCHED_ASSIST remove static
-/*static*/ int sched_boost_type = SCHED_NO_BOOST;
+static int sched_boost_type = SCHED_NO_BOOST;
 
 inline int valid_cpu_prefer(int task_prefer)
 {
@@ -616,9 +612,6 @@ void __init init_efuse_info(void)
 	efuse_aware_big_thermal = (get_devinfo_with_index(7) & 0xFF) == 0x30;
 }
 #endif
-#ifdef CONFIG_MTK_SCHED_BOOST
-extern oplus_task_sched_boost(struct task_struct *p, int *task_prefer);
-#endif
 int select_task_prefer_cpu(struct task_struct *p, int new_cpu)
 {
 	int task_prefer;
@@ -633,15 +626,6 @@ int select_task_prefer_cpu(struct task_struct *p, int new_cpu)
 #endif
 
 	task_prefer = cpu_prefer(p);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	if(task_prefer == SCHED_PREFER_LITTLE && (test_task_ux(p) || is_sf(p)) && sysctl_sched_assist_enabled && (sched_assist_scene(SA_SLIDE)|| sched_assist_scene(SA_INPUT) || sched_assist_scene(SA_LAUNCHER_SI) || sched_assist_scene(SA_ANIM))){
-		task_prefer = SCHED_PREFER_NONE;
-		p->cpu_prefer = SCHED_PREFER_NONE;
-	}
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
-#ifdef CONFIG_MTK_SCHED_BOOST //OPLUS_FEATURE_SCHED_ASSIST
-	oplus_task_sched_boost(p, &task_prefer);
-#endif
 	if (!hinted_cpu_prefer(task_prefer))
 		goto out;
 
@@ -651,17 +635,8 @@ int select_task_prefer_cpu(struct task_struct *p, int new_cpu)
 	}
 
 	for (i = 0; i < domain_cnt; i++) {
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-		if (task_prefer == SCHED_PREFER_BIG)
-			iter_domain = domain_cnt - i - 1;
-		else if (task_prefer == SCHED_PREFER_MEDIUM)
-			iter_domain = (i < domain_cnt -1) ? i + 1 : 0;
-		else
-			iter_domain = i;
-#else
 		iter_domain = (task_prefer == SCHED_PREFER_BIG) ?
 				domain_cnt-i-1 : i;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 
 		domain = tmp_domain[iter_domain];
 
@@ -789,9 +764,7 @@ int set_sched_boost(unsigned int val)
 		if (val == SCHED_ALL_BOOST)
 			sched_scheduler_switch(SCHED_HMP_LB);
 		else if (val == SCHED_FG_BOOST) {
-			//OPLUS_FEATURE_SCHED_ASSIST
-			//In MTK platform,we use oplus_task_sched_boost
-			//sched_set_boost_fg();
+			sched_set_boost_fg();
 		}
 	}
 	printk_deferred("[name:sched_boost&] sched boost: set %d\n",
@@ -949,13 +922,8 @@ int sched_walt_enable(int user, int en)
 	}
 
 #ifdef CONFIG_SCHED_WALT
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-	sysctl_sched_use_walt_cpu_util  = 0;
-	sysctl_sched_use_walt_task_util = 0;
-#else /* OPLUS_FEATURE_SCHED_ASSIST */
 	sysctl_sched_use_walt_cpu_util  = walted;
 	sysctl_sched_use_walt_task_util = walted;
-#endif /* OPLUS_FEATURE_SCHED_ASSIST */
 	trace_sched_ctl_walt(user_mask, walted);
 #endif
 

@@ -55,9 +55,7 @@
 #include <trace/events/mtk_events.h>
 EXPORT_TRACEPOINT_SYMBOL(gpu_freq);
 #endif
-/* #ifdef OPLUS_BUG_STABILITY */
-#include <soc/oplus/system/oplus_project.h>
-/* #endif */
+
 /*
  * On boot up, the ring buffer is set to the minimum size, so that
  * we do not waste memory on systems that are not using tracing.
@@ -2323,11 +2321,7 @@ trace_event_buffer_lock_reserve(struct ring_buffer **current_rb,
 	    (entry = this_cpu_read(trace_buffered_event))) {
 		/* Try to use the per cpu buffer first */
 		val = this_cpu_inc_return(trace_buffered_event_cnt);
-                #ifdef OPLUS_BUG_STABILITY
-                if ((len < (PAGE_SIZE - sizeof(*entry) - sizeof(entry->array[0]))) && val == 1) {
-                #else
 		if ((len < (PAGE_SIZE - sizeof(*entry))) && val == 1) {
-                #endif /*OPLUS_BUG_STABILITY*/
 			trace_event_setup(entry, type, flags, pc);
 			entry->array[0] = len;
 			return entry;
@@ -7933,14 +7927,6 @@ static int instance_rmdir(const char *name)
 
 static __init void create_trace_instances(struct dentry *d_tracer)
 {
-/* #ifdef OPLUS_BUG_STABILITY */
-/* disable ftrace for aging test */
-	if (get_eng_version() == AGING) {
-		pr_info("skip create_trace_instances for aging\n");
-		return;
-	}
-/* #endif */
-
 	trace_instance_dir = tracefs_create_instance_dir("instances", d_tracer,
 							 instance_mkdir,
 							 instance_rmdir);

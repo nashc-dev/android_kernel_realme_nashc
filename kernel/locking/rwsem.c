@@ -18,13 +18,6 @@
 #include <mt-plat/turbo_common.h>
 #endif
 
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-#include <linux/mm.h>
-#include <linux/sched.h>
-#include <../sched/sched.h>
-#include <linux/sched/clock.h>
-#endif
 
 /*
  * lock for reading
@@ -36,10 +29,6 @@ void __sched down_read(struct rw_semaphore *sem)
 
 	LOCK_CONTENDED(sem, __down_read_trylock, __down_read);
 	rwsem_set_reader_owned(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 }
 
 EXPORT_SYMBOL(down_read);
@@ -54,10 +43,6 @@ int down_read_trylock(struct rw_semaphore *sem)
 	if (ret == 1) {
 		rwsem_acquire_read(&sem->dep_map, 0, 1, _RET_IP_);
 		rwsem_set_reader_owned(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-		uxchain_rwsem_down(sem);
-#endif
 	}
 	return ret;
 }
@@ -74,10 +59,6 @@ void __sched down_write(struct rw_semaphore *sem)
 
 	LOCK_CONTENDED(sem, __down_write_trylock, __down_write);
 	rwsem_set_owner(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 }
 
 EXPORT_SYMBOL(down_write);
@@ -96,10 +77,6 @@ int __sched down_write_killable(struct rw_semaphore *sem)
 	}
 
 	rwsem_set_owner(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 	return 0;
 }
 
@@ -115,10 +92,6 @@ int down_write_trylock(struct rw_semaphore *sem)
 	if (ret == 1) {
 		rwsem_acquire(&sem->dep_map, 0, 1, _RET_IP_);
 		rwsem_set_owner(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-		uxchain_rwsem_down(sem);
-#endif
 	}
 
 	return ret;
@@ -134,10 +107,6 @@ void up_read(struct rw_semaphore *sem)
 	rwsem_release(&sem->dep_map, 1, _RET_IP_);
 
 	__up_read(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_up(sem);
-#endif
 }
 
 EXPORT_SYMBOL(up_read);
@@ -154,10 +123,6 @@ void up_write(struct rw_semaphore *sem)
 	rwsem_stop_turbo_inherit(sem);
 #endif
 	__up_write(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_up(sem);
-#endif
 }
 
 EXPORT_SYMBOL(up_write);
@@ -187,10 +152,6 @@ void down_read_nested(struct rw_semaphore *sem, int subclass)
 
 	LOCK_CONTENDED(sem, __down_read_trylock, __down_read);
 	rwsem_set_reader_owned(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 }
 
 EXPORT_SYMBOL(down_read_nested);
@@ -202,10 +163,6 @@ void _down_write_nest_lock(struct rw_semaphore *sem, struct lockdep_map *nest)
 
 	LOCK_CONTENDED(sem, __down_write_trylock, __down_write);
 	rwsem_set_owner(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 }
 
 EXPORT_SYMBOL(_down_write_nest_lock);
@@ -215,10 +172,6 @@ void down_read_non_owner(struct rw_semaphore *sem)
 	might_sleep();
 
 	__down_read(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 
 }
 
@@ -231,10 +184,6 @@ void down_write_nested(struct rw_semaphore *sem, int subclass)
 
 	LOCK_CONTENDED(sem, __down_write_trylock, __down_write);
 	rwsem_set_owner(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 }
 
 EXPORT_SYMBOL(down_write_nested);
@@ -250,10 +199,6 @@ int __sched down_write_killable_nested(struct rw_semaphore *sem, int subclass)
 	}
 
 	rwsem_set_owner(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_down(sem);
-#endif
 	return 0;
 }
 
@@ -262,10 +207,6 @@ EXPORT_SYMBOL(down_write_killable_nested);
 void up_read_non_owner(struct rw_semaphore *sem)
 {
 	__up_read(sem);
-#ifdef OPLUS_FEATURE_SCHED_ASSIST
-//#ifdef CONFIG_UXCHAIN_V2
-	uxchain_rwsem_up(sem);
-#endif
 }
 
 EXPORT_SYMBOL(up_read_non_owner);

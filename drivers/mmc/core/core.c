@@ -55,9 +55,6 @@
 #include "mtk_mmc_block.h"
 #include "queue.h"
 
-#ifdef OPLUS_FEATURE_SDCARD_INFO
-#include "../host/sdInfo/sdinfo.h"
-#endif
 
 /* If the device is not responding */
 #define MMC_CORE_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
@@ -1283,18 +1280,6 @@ static void mmc_wait_data_done(struct mmc_request *mrq)
 	context_info->is_done_rcv = true;
 	wake_up_interruptible(&context_info->wait);
 
-#ifdef OPLUS_FEATURE_SDCARD_INFO
-	if (mrq->host && mrq->host->card && mmc_card_sd(mrq->host->card)) {
-		if ((mrq->cmd && (mrq->cmd->error == -ETIMEDOUT)) || (mrq->stop && (mrq->stop->error == -ETIMEDOUT)) || (mrq->sbc && (mrq->sbc->error == -ETIMEDOUT)))
-			sdinfo.cmd_timeout_count += 1;
-		else if ((mrq->cmd && (mrq->cmd->error == -EILSEQ)) || (mrq->stop && (mrq->stop->error == -EILSEQ)) || (mrq->sbc && (mrq->sbc->error == -EILSEQ)))
-			sdinfo.cmd_crc_err_count += 1;
-		else if (mrq->data && (mrq->data->error == -ETIMEDOUT))
-			sdinfo.data_timeout_int_count +=1;
-		else if (mrq->data && (mrq->data->error == -EILSEQ))
-			sdinfo.data_crc_err_count += 1;
-	}
-#endif
 }
 
 static void mmc_wait_done(struct mmc_request *mrq)
@@ -1398,18 +1383,6 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
 			}
 		}
 
-#ifdef OPLUS_FEATURE_SDCARD_INFO
-		if (host && host->card && mmc_card_sd(host->card)) {
-			if ((mrq->cmd && (mrq->cmd->error == -ETIMEDOUT)) || (mrq->stop && (mrq->stop->error == -ETIMEDOUT)) || (mrq->sbc && (mrq->sbc->error == -ETIMEDOUT)))
-				sdinfo.cmd_timeout_count += 1;
-			else if ((mrq->cmd && (mrq->cmd->error == -EILSEQ)) || (mrq->stop && (mrq->stop->error == -EILSEQ)) || (mrq->sbc && (mrq->sbc->error == -EILSEQ)))
-				sdinfo.cmd_crc_err_count += 1;
-			else if (mrq->data && (mrq->data->error == -ETIMEDOUT))
-				sdinfo.data_timeout_int_count +=1;
-			else if (mrq->data && (mrq->data->error == -EILSEQ))
-				sdinfo.data_crc_err_count += 1;
-		}
-#endif
 		if (!cmd->error || !cmd->retries ||
 		    mmc_card_removed(host->card))
 			break;

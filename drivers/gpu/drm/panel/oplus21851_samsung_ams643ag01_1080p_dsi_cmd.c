@@ -30,7 +30,6 @@
 #include <linux/platform_device.h>
 #include <linux/of_graph.h>
 #include <soc/oplus/device_info.h>
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
 #include <mt-plat/mtk_boot_common.h>
 
 #define CONFIG_MTK_PANEL_EXT
@@ -1301,11 +1300,6 @@ static int lcm_panel_poweroff(struct drm_panel *panel)
 		lcm_unprepare(panel);
 
         msleep(70);
-
-	/*if (fan53870_fail_flag == 1) {
-		mm_fb_display_kevent("DisplayDriverID@@509$$", MM_FB_KEY_RATELIMIT_1H, "fan53870 no ok");
-		fan53870_fail_flag = 0;
-	}*/
 
 	return 0;
 }

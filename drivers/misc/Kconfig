@@ -575,5 +575,4 @@ source "drivers/misc/tri_state_key/Kconfig"
 #ifdef OPLUS_FEATURE_CHG_BASIC//Fanhong.Kong@ProDrv.CHG,add 2018/10/25 for vib aw8697
 source "drivers/misc/aw8697_haptic/Kconfig"
 #endif
-source "drivers/misc/oplus_misc_healthinfo/Kconfig"
 endmenu

@@ -28,9 +28,6 @@
 #include <linux/kthread.h>
 #include <linux/sched.h>
 #include <uapi/linux/sched/types.h>
-#ifdef OPLUS_BUG_STABILITY
-#include <soc/oplus/system/oplus_mm_kevent_fb.h>
-#endif
 
 #include "mtk_drm_arr.h"
 #include "mtk_drm_drv.h"
@@ -6148,9 +6145,6 @@ static void mtk_drm_crtc_atomic_begin(struct drm_crtc *crtc,
 			DDPAEE("%s:%d, invalid vblank:%d, crtc:%p\n",
 				__func__, __LINE__,
 				drm_crtc_vblank_get(crtc), crtc);
-			#ifdef OPLUS_BUG_STABILITY
-			mm_fb_display_kevent("DisplayDriverID@@503$$", MM_FB_KEY_RATELIMIT_1H, "invalid vblank:%d", drm_crtc_vblank_get(crtc));
-			#endif
 		}
 		mtk_crtc->event = state->base.event;
 		state->base.event = NULL;
