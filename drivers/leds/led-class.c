@@ -25,31 +25,6 @@
 
 static struct class *leds_class;
 
-//#ifdef OPLUS_BUG_STABILITY
-/*
-* add for oppo brightness and max_brightness node
-*/
-#if defined(DRM_OPLUS_DISPLAY_NODES)
-extern unsigned long oplus_display_brightness;
-extern unsigned int m_new_pq_persist_property[32];
-enum mtk_pq_persist_property {
-	DISP_PQ_COLOR_BYPASS,
-	DISP_PQ_CCORR_BYPASS,
-	DISP_PQ_GAMMA_BYPASS,
-	DISP_PQ_DITHER_BYPASS,
-	DISP_PQ_AAL_BYPASS,
-	DISP_PQ_C3D_BYPASS,
-	DISP_PQ_TDSHP_BYPASS,
-	DISP_PQ_CCORR_SILKY_BRIGHTNESS,
-	DISP_PQ_GAMMA_SILKY_BRIGHTNESS,
-	DISP_PQ_PROPERTY_MAX,
-};
-/*Jian.Zhou@MM.Display.LCD.Stability, 2020/11/25 ,compatible drm and common*/
-#else
-extern unsigned long oplus_display_brightness;
-#endif
-//#endif
-
 /* #ifdef OPLUS_BUG_STABILITY */
 #ifdef OPLUS_FEATURE_MULTIBITS_BL
 extern bool __attribute((weak)) oplus_display_tenbits_support;
@@ -117,22 +92,6 @@ static ssize_t brightness_store(struct device *dev,
 	ret = size;
 unlock:
 	mutex_unlock(&led_cdev->led_access);
-
-//#ifdef OPLUS_BUG_STABILITY
-/*
-* add for oppo brightness and max_brightness node
-*/
-#if defined(DRM_OPLUS_DISPLAY_NODES)
-	if (!m_new_pq_persist_property[DISP_PQ_CCORR_SILKY_BRIGHTNESS]) {
-		if (strncmp(led_cdev->name, "lcd-backlight", 13) == 0)
-			oplus_display_brightness = state;
-	}
-/*Jian.Zhou@MM.Display.LCD.Stability, 2020/11/25 ,compatible drm and common*/
-#else
-	if (strncmp(led_cdev->name, "lcd-backlight", 13) == 0)
-		oplus_display_brightness = state;
-#endif
-//#endif
 
 	return ret;
 }

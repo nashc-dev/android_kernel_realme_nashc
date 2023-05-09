@@ -58,6 +58,7 @@
 extern bool __attribute((weak)) oplus_display_twelvebits_support;
 #include <mt-plat/mtk_boot_common.h>
 extern unsigned long oplus_silence_mode;
+extern unsigned long oplus_display_brightness;
 #endif
 
 /* for LED&Backlight bringup, define the dummy API */
@@ -816,6 +817,7 @@ int mt_mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 				else
 					level = brightness_mapto64(tmp_level);
 
+				oplus_display_brightness = level;
 				mt_backlight_set_pwm(cust->data, level,
 					bl_div_hal, &cust->config_data);
 			}
@@ -862,8 +864,10 @@ int mt_mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 	case MT65XX_LED_MODE_CUST_LCM:
 	{
 		unsigned int mapped_level = brightness_mapping(cust, level);
-		if (strcmp(cust->name, "lcd-backlight") == 0)
+		if (strcmp(cust->name, "lcd-backlight") == 0) {
 			bl_brightness_hal = mapped_level;
+			oplus_display_brightness = mapped_level;
+		}
 		LEDS_DEBUG("%s backlight control by LCM\n", __func__);
 		/* warning for this API revork */
 		return ((cust_brightness_set) (cust->data)) (mapped_level, bl_div_hal);
@@ -871,8 +875,10 @@ int mt_mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 	case MT65XX_LED_MODE_CUST_BLS_PWM:
 	{
 		unsigned int mapped_level = brightness_mapping(cust, level);
-		if (strcmp(cust->name, "lcd-backlight") == 0)
+		if (strcmp(cust->name, "lcd-backlight") == 0) {
 			bl_brightness_hal = mapped_level;
+			oplus_display_brightness = mapped_level;
+		}
 #ifdef MET_USER_EVENT_SUPPORT
 		if (enable_met_backlight_tag())
 			output_met_backlight_tag(mapped_level);

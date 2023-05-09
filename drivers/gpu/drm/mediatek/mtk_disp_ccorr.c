@@ -96,12 +96,9 @@ static int g_old_pq_backlight;
 static int g_pq_backlight;
 static int g_pq_backlight_db;
 static atomic_t g_ccorr_is_init_valid = ATOMIC_INIT(0);
-#ifdef OPLUS_BUG_STABILITY
-extern unsigned long oplus_display_brightness;
 #if defined(OPLUS_BUG_STABILITY) && defined(CONFIG_LEDS_MTK_DISP)
 /* Zhijun.Ye@MM.Display.LCD, 2022/01/27, add for custimizing color temperature */
 extern int oplus_disp_ccorr_without_gamma;
-#endif
 #endif
 
 static DEFINE_MUTEX(g_ccorr_global_lock);
@@ -863,9 +860,6 @@ int mtk_drm_ioctl_set_ccorr(struct drm_device *dev, void *data,
 			DDPINFO("brightness = %d, silky_bright_flag = %d",
 				ccorr_config->FinalBacklight,
 				ccorr_config->silky_bright_flag);
-			#ifdef OPLUS_BUG_STABILITY
-			oplus_display_brightness = ccorr_config->FinalBacklight;
-			#endif
 			mt_leds_brightness_set("lcd-backlight",
 				ccorr_config->FinalBacklight);
 		}
