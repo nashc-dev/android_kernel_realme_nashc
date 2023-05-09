@@ -469,7 +469,6 @@ int primary_display_set_safe_mode(unsigned int level)
 }
 #endif
 
-unsigned int oplus_display_normal_max_brightness = 0;
 /* Zhijun.Ye@MM.Display.LCD.Machine, 2020/09/23, add for lcd */
 int oplus_mtkfb_custom_data_init(struct platform_device *pdev)
 {
@@ -507,12 +506,6 @@ int oplus_mtkfb_custom_data_init(struct platform_device *pdev)
 		dev_err(&pdev->dev, "read property oplus_display_esd_try_count failed.");
 	else
 		DISPMSG("%s:oplus_display_esd_try_count=%u\n", __func__, oplus_display_esd_try_count);
-
-	of_ret = of_property_read_u32(pdev->dev.of_node, "oplus_display_normal_max_brightness", &oplus_display_normal_max_brightness);
-	if (!of_ret)
-		dev_err(&pdev->dev, "read property oplus_display_normal_max_brightness failed.");
-	else
-		DISPMSG("%s:oplus_display_normal_max_brightness=%u\n", __func__, oplus_display_normal_max_brightness);
 
 	return of_ret;
 }
@@ -586,15 +579,7 @@ static ssize_t oplus_display_set_brightness(struct device *dev,
 static ssize_t oplus_display_get_max_brightness(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned int max_brightness = 0;
-
-	if (!oplus_display_normal_max_brightness)
-		max_brightness = LED_FULL;
-	else
-		max_brightness = oplus_display_normal_max_brightness;
-
-	//printk(KERN_INFO "oplus_display_get_max_brightness = %d\n",LED_FULL);
-	return sprintf(buf, "%u\n", max_brightness);
+	return sprintf(buf, "%u\n", LED_FULL);
 }
 
 int oplus_display_panel_get_max_brightness(void *buf)
@@ -606,10 +591,7 @@ int oplus_display_panel_get_max_brightness(void *buf)
 		return -1;
 	}
 
-	if (!oplus_display_normal_max_brightness)
-		(*max_brightness) = LED_FULL;
-	else
-		(*max_brightness) = oplus_display_normal_max_brightness;
+	(*max_brightness) = LED_FULL;
 
 	pr_info("value is %d", *max_brightness);
 	return 0;
