@@ -79,10 +79,9 @@ static void *stack_slabs[STACK_ALLOC_MAX_SLABS];
 static int depot_index;
 static int next_slab_inited;
 static size_t depot_offset;
-static DEFINE_SPINLOCK(depot_lock);
+static DEFINE_RAW_SPINLOCK(depot_lock);
 static struct stack_record *max_found;
-static DEFINE_SPINLOCK(max_found_lock);
-
+static DEFINE_RAW_SPINLOCK(max_found_lock);
 
 static bool init_stack_slab(void **prealloc)
 {
@@ -213,10 +212,10 @@ void depot_hit_stack(depot_stack_handle_t handle, struct stack_trace *trace,
 	unsigned long flags;
 
 	stack->hit += cnt;
-	spin_lock_irqsave(&max_found_lock, flags);
+	raw_spin_lock_irqsave(&max_found_lock, flags);
 	if ((!max_found) || (stack->hit > max_found->hit))
 		max_found = stack;
-	spin_unlock_irqrestore(&max_found_lock, flags);
+	raw_spin_unlock_irqrestore(&max_found_lock, flags);
 }
 EXPORT_SYMBOL_GPL(depot_hit_stack);
 
@@ -230,11 +229,11 @@ void show_max_hit_page(void)
 		.max_entries = 16,
 		.skip = 0
 	};
-	spin_lock_irqsave(&max_found_lock, flags);
+	raw_spin_lock_irqsave(&max_found_lock, flags);
 	depot_fetch_stack(max_found->handle.handle, &trace);
 	pr_info("max found hit=%d\n", max_found->hit);
 	print_stack_trace(&trace, 2);
-	spin_unlock_irqrestore(&max_found_lock, flags);
+	raw_spin_unlock_irqrestore(&max_found_lock, flags);
 }
 EXPORT_SYMBOL_GPL(show_max_hit_page);
 
@@ -293,7 +292,7 @@ depot_stack_handle_t depot_save_stack(struct stack_trace *trace,
 			prealloc = page_address(page);
 	}
 
-	spin_lock_irqsave(&depot_lock, flags);
+	raw_spin_lock_irqsave(&depot_lock, flags);
 
 	found = find_stack(*bucket, trace->entries, trace->nr_entries, hash);
 	if (!found) {
@@ -317,7 +316,7 @@ depot_stack_handle_t depot_save_stack(struct stack_trace *trace,
 		WARN_ON(!init_stack_slab(&prealloc));
 	}
 
-	spin_unlock_irqrestore(&depot_lock, flags);
+	raw_spin_unlock_irqrestore(&depot_lock, flags);
 exit:
 	if (prealloc) {
 		/* Nobody used this memory, ok to free it. */

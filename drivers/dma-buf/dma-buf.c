@@ -91,6 +91,7 @@ static void dma_buf_release(struct dentry *dentry)
 	kfree(dmabuf->name);
 	kfree(dmabuf);
 }
+
 static int dma_buf_file_release(struct inode *inode, struct file *file)
 {
 	struct dma_buf *dmabuf;
@@ -400,7 +401,8 @@ static long dma_buf_ioctl(struct file *file,
 
 		return ret;
 
-	case DMA_BUF_SET_NAME:
+	case DMA_BUF_SET_NAME_A:
+	case DMA_BUF_SET_NAME_B:
 		return dma_buf_set_name(dmabuf, (const char __user *)arg);
 
 	default:
