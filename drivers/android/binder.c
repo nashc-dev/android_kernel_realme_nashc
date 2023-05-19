@@ -3766,15 +3766,6 @@ static void binder_transaction(struct binder_proc *proc,
 			goto err_dead_binder;
 		}
 
-#if defined(CONFIG_CFS_BANDWIDTH)
-		if (!(tr->flags & TF_ONE_WAY) /*report sync binder call*/
-			&& target_proc
-			&& (task_uid(target_proc->tsk).val > MIN_USERAPP_UID || task_uid(target_proc->tsk).val == HANS_SYSTEM_UID) //uid >10000
-			&& is_belong_cpugrp(target_proc->tsk)) {
-			hans_report(SYNC_BINDER_CPUCTL, task_tgid_nr(proc->tsk), task_uid(proc->tsk).val, task_tgid_nr(target_proc->tsk), task_uid(target_proc->tsk).val, "SYNC_BINDER_CPUCTL", -1);
-		}
-#endif
-
 		e->to_node = target_node->debug_id;
 #ifdef BINDER_WATCHDOG
 		strncpy(e->service, target_node->name, MAX_SERVICE_NAME_LEN);
