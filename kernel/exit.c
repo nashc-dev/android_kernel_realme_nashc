@@ -68,9 +68,6 @@
 #include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
-#ifdef CONFIG_OPLUS_FEATURE_UID_PERF
-extern void uid_check_out_pevent(struct task_struct *task);
-#endif
 
 
 static void __unhash_process(struct task_struct *p, bool group_dead)
@@ -806,9 +803,6 @@ void __noreturn do_exit(long code)
 		preempt_count_set(PREEMPT_ENABLED);
 	}
 
-#ifdef CONFIG_OPLUS_FEATURE_UID_PERF
-	uid_check_out_pevent(tsk);
-#endif
 
 	profile_task_exit(tsk);
 	kcov_task_exit(tsk);
