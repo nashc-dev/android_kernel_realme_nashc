@@ -37,6 +37,7 @@ extern bool __attribute((weak)) oplus_display_twelvebits_support;
 extern bool oplus_flag_lcd_off;
 extern bool oplus_display_aod_support;
 extern bool oplus_display_hbm_support;
+extern unsigned long HBM_mode;
 /* #endif */ /* OPLUS_FEATURE_AOD */
 extern int __attribute__((weak)) tp_gesture_enable_flag(void)
 {
@@ -1668,6 +1669,11 @@ int disp_lcm_set_backlight(struct disp_lcm_handle *plcm,
 	if (pgc->state == DISP_SLEPT) {
 		DISP_PR_INFO("Sleep State set backlight invalid\n");
 		return -1;
+	}
+
+	if (!!HBM_mode) {
+		DISP_PR_INFO("Ignoring request to set backlight brightness because HBM is enabled\n");
+		return 0;
 	}
 
 	lcm_drv = plcm->drv;

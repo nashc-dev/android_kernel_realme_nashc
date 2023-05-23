@@ -2038,8 +2038,8 @@ static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 		aod_state = true;
 		lcm_aod_display_on(handle);
 	} else {
-		if (level >= BRIGHTNESS_MAX) {
-			mapped_level = BRIGHTNESS_MAX;
+		if (level >= BRIGHTNESS_HALF) {
+			mapped_level = BRIGHTNESS_HALF;
 		} else if (level < BRIGHTNESS_OFF) {
 			mapped_level = BRIGHTNESS_OFF;
 		} else {
