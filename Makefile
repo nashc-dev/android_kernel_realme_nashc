@@ -589,6 +589,8 @@ endif
 
 export KBUILD_MODULES KBUILD_BUILTIN
 
+-include OplusKernelEnvConfig.mk
+
 ifeq ($(KBUILD_EXTMOD),)
 # Objects we will link into vmlinux / subdirs we need to visit
 init-y		:= init/
