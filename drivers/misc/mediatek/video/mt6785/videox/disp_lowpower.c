@@ -1370,7 +1370,7 @@ static int hrt_bw_cond_change_cb(struct notifier_block *nb,
 		}
 		/* switch to decouple mode */
 		if (disp_mgr_has_mem_session() ||
-				layering_get_valid_hrt() >= 400) {
+				layering_get_valid_hrt(active_cfg_id) >= 400) {
 			/* enable HRT throttle */
 			DISPINFO("Cam trigger repain\n");
 			hrt_idx = layering_rule_get_hrt_idx();

@@ -12,7 +12,7 @@
 #include "lcm_drv.h"
 #include <linux/interrupt.h>
 
-#define HW_NUM			(1)
+#define HW_NUM			(2)
 #define RX_V12			(1700)
 #ifdef CONFIG_MTK_MT6382_VDO_MODE
 #define _VDO_120FPS_
@@ -68,6 +68,7 @@ enum MIPI_TX_PAD_VALUE {
 #define REG_FLAG_ESCAPE_ID				(0x00)
 #define REG_FLAG_DELAY_MS_V3				(0xFF)
 
+int bdg_is_bdg_connected(void);
 int bdg_tx_init(enum DISP_BDG_ENUM module,
 		   struct disp_ddp_path_config *config, void *cmdq);
 int bdg_tx_deinit(enum DISP_BDG_ENUM module, void *cmdq);

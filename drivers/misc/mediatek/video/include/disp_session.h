@@ -335,8 +335,12 @@ struct disp_frame_cfg_t {
 	unsigned int hrt_weight;
 	unsigned int hrt_idx;
 
+	/* #ifndef OPLUS_FEATURE_ONSCREENFINGERPRINT */
 	/* for panel HBM (High Backlight Mode) control */
-	bool hbm_en;
+	/* bool hbm_en; */
+	/* #else */
+	unsigned int hbm_en;
+	/* #endif */
 	/*DynFPS*/
 	int active_config;
 };
