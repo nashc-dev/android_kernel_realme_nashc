@@ -68,7 +68,7 @@ static int disp_tphint_connect(struct input_handler *handler,
 	if (error)
 		goto err_unregister_handle;
 
-	return 0;
+
 
  err_unregister_handle:
 	input_unregister_handle(handle);

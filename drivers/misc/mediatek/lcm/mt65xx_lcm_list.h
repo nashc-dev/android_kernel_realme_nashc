@@ -9,6 +9,9 @@
 
 #include <lcm_drv.h>
 
+extern struct LCM_DRIVER oppo20730_samsung_ams643xy04_1080p_dsi_vdo_lcm_drv_1; // add for Nash-C
+extern struct LCM_DRIVER oppo20730_samsung_ams643xy04_1080p_dsi_vdo_lcm_drv_2; // add for Nash-C second panel
+extern struct LCM_DRIVER oppo20730_samsung_ams643xy04_1080p_dsi_vdo_lcm_drv_3;
 extern struct LCM_DRIVER otm1282a_hd720_dsi_vdo_60hz_lcm_drv;
 extern struct LCM_DRIVER otm1282a_hd720_dsi_vdo_lcm_drv;
 extern struct LCM_DRIVER nt35595_fhd_dsi_cmd_truly_8163_lcm_drv;

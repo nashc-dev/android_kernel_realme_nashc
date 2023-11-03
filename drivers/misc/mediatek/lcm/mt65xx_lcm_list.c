@@ -21,6 +21,11 @@ enum LCM_DSI_MODE_CON lcm_dsi_mode;
 #define LCD_HW_ID_STATUS_ERROR  0x03
 
 struct LCM_DRIVER *lcm_driver_list[] = {
+#if defined(OPPO20730_SAMSUNG_AMS643XY04_DSI_CMD)
+	&oppo20730_samsung_ams643xy04_1080p_dsi_vdo_lcm_drv_1,
+	&oppo20730_samsung_ams643xy04_1080p_dsi_vdo_lcm_drv_2,
+    &oppo20730_samsung_ams643xy04_1080p_dsi_vdo_lcm_drv_3,
+#endif
 #if defined(HX83102P_WXGA_VDO_INCELL_BOE)
 	&hx83102p_wxga_vdo_incell_boe_lcm_drv,
 #endif
