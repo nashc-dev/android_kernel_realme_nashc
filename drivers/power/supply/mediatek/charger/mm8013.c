@@ -322,6 +322,7 @@ static int force_get_tbat_mm8013(bool update, int *temp)
  * below 4250mV. To avoid capacity jump, only 1% change is
  * allowed in 1 minute.
  */
+#if defined(BAT_CAPACITY_ADJUST)
 bool battery_adjust_capacity(int *capacity)
 {
 	static bool keep_full;
@@ -380,7 +381,7 @@ bool battery_adjust_capacity(int *capacity)
 
 	return false;
 }
-
+#endif
 
 static void mm8013_battery_update_work(struct work_struct *work)
 {
@@ -404,7 +405,9 @@ static void mm8013_battery_update_work(struct work_struct *work)
 		gm.bat_cycle = cycle_count;
 
 	if (!mm8013_get_info(POWER_SUPPLY_PROP_CAPACITY, &capacity)) {
+#if defined(BAT_CAPACITY_ADJUST)
 		battery_adjust_capacity(&capacity);
+#endif
 		battery_main.BAT_CAPACITY = capacity;
 		gm.ui_soc = capacity;
 		gm.fixed_uisoc = capacity;
