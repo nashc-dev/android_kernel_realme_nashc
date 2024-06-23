@@ -340,16 +340,16 @@ static int chg_tcp_notifier_call(struct notifier_block *nb,
 			if (irq) {
 				if (dp_sw_connect == false) {
 					usbc_dbg(K_INFO, "Force connect\n");
-					//mtk_dp_SWInterruptSet(0x4);
+					mtk_dp_SWInterruptSet(0x4);
 					dp_sw_connect = true;
 				}
-				//mtk_dp_SWInterruptSet(0x8);
+				mtk_dp_SWInterruptSet(0x8);
 			} else {
-				//mtk_dp_SWInterruptSet(0x4);
+				mtk_dp_SWInterruptSet(0x4);
 				dp_sw_connect = true;
 			}
 		} else {
-			//mtk_dp_SWInterruptSet(0x2);
+			mtk_dp_SWInterruptSet(0x2);
 			dp_sw_connect = false;
 		}
 	} else if (event == TCP_NOTIFY_TYPEC_STATE) {
@@ -368,7 +368,7 @@ static int chg_tcp_notifier_call(struct notifier_block *nb,
 			pr_info("P537 typec Plug out\n");
 			pi3dpx1205a_writen(usbdp_client, 0xA8);
 			pi3dpx1205a_readn(usbdp_client,0x06);
-			//mtk_dp_SWInterruptSet(0x2);
+			mtk_dp_SWInterruptSet(0x2);
 			dp_sw_connect = false;
 		}
 		pr_info("yds_event == TCP_NOTIFY_TYPEC_STATE!!!!!!\n");
