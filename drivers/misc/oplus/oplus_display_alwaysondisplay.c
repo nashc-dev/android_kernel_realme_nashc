@@ -182,7 +182,7 @@ int primary_display_set_aod_mode_nolock(unsigned int mode)
 }
 //#endif
 
-void oppo_display_aod_backlight()
+void oppo_display_aod_backlight(void)
 {
 	int ret;
 	/* blocking flush before stop trigger loop */
