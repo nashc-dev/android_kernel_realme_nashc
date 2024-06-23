@@ -26,6 +26,10 @@
 #include <linux/random.h>
 #include <linux/seq_file.h>
 
+#ifdef CONFIG_MTK_DEVINFO
+#include <linux/nvmem-consumer.h>
+#endif
+
 #include "mtk_gpufreq.h"
 #include "mtk_gpufreq_core.h"
 
