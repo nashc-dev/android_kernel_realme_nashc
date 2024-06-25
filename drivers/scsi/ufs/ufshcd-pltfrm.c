@@ -145,7 +145,7 @@ static bool phandle_exists(const struct device_node *np,
 
 #define MAX_PROP_SIZE 32
 static int ufshcd_populate_vreg(struct device *dev, const char *name,
-				struct ufs_vreg **out_vreg)
+		struct ufs_vreg **out_vreg)
 {
 	int ret = 0;
 	char prop_name[MAX_PROP_SIZE];
@@ -169,6 +169,11 @@ static int ufshcd_populate_vreg(struct device *dev, const char *name,
 		return -ENOMEM;
 
 	vreg->name = kstrdup(name, GFP_KERNEL);
+
+	/* if fixed regulator no need further initialization */
+	snprintf(prop_name, MAX_PROP_SIZE, "%s-fixed-regulator", name);
+	if (of_property_read_bool(np, prop_name))
+		goto out;
 
 	snprintf(prop_name, MAX_PROP_SIZE, "%s-max-microamp", name);
 	if (of_property_read_u32(np, prop_name, &vreg->max_uA)) {
@@ -454,6 +459,8 @@ int ufshcd_pltfrm_init(struct platform_device *pdev,
 		dev_err(dev, "Initialization failed\n");
 		goto dealloc_host;
 	}
+
+	platform_set_drvdata(pdev, hba);
 
 	pm_runtime_set_active(&pdev->dev);
 	pm_runtime_enable(&pdev->dev);
