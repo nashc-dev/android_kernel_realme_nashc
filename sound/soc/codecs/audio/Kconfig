@@ -1,0 +1,11 @@
+#
+# oplus extend audio codec configuration
+#
+
+#ifdef OPLUS_ARCH_EXTENDS
+config SND_SOC_CODEC_AW88264
+        tristate "SoC Audio for awinic aw88264series"
+        depends on I2C
+        help
+          This option enables support for aw88264series Smart PA.
+#endif /* OPLUS_ARCH_EXTENDS */

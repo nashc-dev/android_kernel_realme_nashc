@@ -707,13 +707,15 @@ static int mt_soc_snd_probe(struct platform_device *pdev)
 	int ret;
 	int daiLinkNum = 0;
 
+#ifndef OPLUS_BUG_COMPATIBILITY
+	//2019/08/26, Remove for load tfa98xx
 	ret = mtk_spk_update_dai_link(mt_soc_extspk_dai, pdev);
 	if (ret) {
 		dev_err(&pdev->dev, "%s(), mtk_spk_update_dai_link error\n",
 			__func__);
 		return -EINVAL;
 	}
-
+#endif /* OPLUS_BUG_COMPATIBILITY */
 	/* get_ext_dai_codec_name(); */
 	pr_debug("%s(), dai_link = %p\n",
 		 __func__, mt_snd_soc_card_mt.dai_link);
