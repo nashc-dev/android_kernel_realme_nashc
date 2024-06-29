@@ -48,6 +48,7 @@ enum mtk_pq_persist_property {
 
 /* #ifdef OPLUS_BUG_STABILITY */
 extern unsigned long __attribute((weak)) oplus_display_brightness;
+extern bool __attribute((weak)) oplus_display_hbm_support;
 /* #endif */ /* OPLUS_BUG_STABILITY */
 
 static ssize_t brightness_show(struct device *dev,
@@ -380,7 +381,7 @@ int of_led_classdev_register(struct device *parent, struct device_node *np,
 	up_write(&leds_list_lock);
 
 	if (!led_cdev->max_brightness)
-		led_cdev->max_brightness = LED_FULL;
+		led_cdev->max_brightness = oplus_display_hbm_support ? LED_HALF : LED_FULL;
 
 #ifdef OPLUS_BUG_STABILITY
 /* MM.Display.LCD, 2022/07/07, add for backlight */
