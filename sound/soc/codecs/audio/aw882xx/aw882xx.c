@@ -68,17 +68,10 @@
  * example : aw882xx_spk_reg_l.bin
  * notice : The mono file name suffix is ".bin"
  ******************************************************/
-#ifdef OPLUS_BUG_COMPATIBILITY
-static char aw882xx_cfg_name[][AW882XX_CFG_NAME_MAX] = {
-	{"../../odm/firmware/aw88264/aw882xx_spk_reg"},
-	{"../../odm/firmware/aw88264/aw882xx_rcv_reg"},
-};
-#else
 static char aw882xx_cfg_name[][AW882XX_CFG_NAME_MAX] = {
 	{"aw88264/aw882xx_spk_reg"},
 	{"aw88264/aw882xx_rcv_reg"},
 };
-#endif
 
 static unsigned int aw882xx_mode_cfg_shift[AW882XX_MODE_SHIFT_MAX] = {
 	AW882XX_MODE_SPK_SHIFT,
