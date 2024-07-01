@@ -51,8 +51,13 @@ ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
 # for gen4m options
 export CONFIG_MTK_COMBO_WIFI_HIF=axi
 export MTK_COMBO_CHIP=CONNAC
+export BT_PLATFORM=6785
 export WLAN_CHIP_ID=6785
 export MTK_ANDROID_WMT=y
+export MTK_ANDROID_EMI=y
+export WIFI_IP_SET=2
+export WIFI_ECO_VER=1
+export MTK_WLAN_SERVICE=yes
 
 # Do build-in for xxx.c checking
 subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
