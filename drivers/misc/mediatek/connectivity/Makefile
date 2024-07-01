@@ -48,6 +48,11 @@ ifeq ($(CONFIG_MTK_COMBO), y)
 endif
 
 ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
+# Do build-in for xxx.c checking
+subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
+subdir-ccflags-y += -D MTK_WCN_BUILT_IN_DRIVER
+endif
+
 # for gen4m options
 export CONFIG_MTK_COMBO_WIFI_HIF=axi
 export MTK_COMBO_CHIP=CONNAC
@@ -60,11 +65,6 @@ export WIFI_ECO_VER=1
 export MTK_WLAN_SERVICE=yes
 export CFG_FM_CHIP_ID=6785
 export CFG_FM_CHIP=mt6631
-
-# Do build-in for xxx.c checking
-subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
-subdir-ccflags-y += -D MTK_WCN_BUILT_IN_DRIVER
-endif
 
 obj-$(CONFIG_MTK_COMBO) += common/
 obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
