@@ -79,6 +79,8 @@ static int button_flag_isink1;
 struct wakeup_source leds_suspend_lock;
 struct cust_mt65xx_led *pled_dtsi;
 
+extern unsigned long HBM_mode;
+
 char *leds_name[MT65XX_LED_TYPE_TOTAL] = {
 	"red",
 	"green",
@@ -865,6 +867,8 @@ int mt_mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 		return mt_brightness_set_pmic(cust->data, level, bl_div_hal);
 
 	case MT65XX_LED_MODE_CUST_LCM:
+		if (HBM_mode)
+			return -1;
 		if (strcmp(cust->name, "lcd-backlight") == 0)
 			bl_brightness_hal = level;
 		LEDS_DEBUG("%s backlight control by LCM\n", __func__);
