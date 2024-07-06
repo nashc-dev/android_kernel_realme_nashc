@@ -51,7 +51,7 @@ enum {
 #define DEVINFO_LOG(fmt, args...)   pr_err(DEV_TAG"%s %d : "fmt, __func__, __LINE__, ##args)
 
 #define UINT2Ptr(n)     (uint32_t *)(n)
-#define Ptr2UINT32(p)   (uint32_t)(p)
+#define Ptr2UINT32(p)   (uintptr_t)(p)
 #define MAG_PARA_OFFSET               8
 /*#define SOURCE_NUM                    3*/
 #define MAG_PARA_NUM                  9
