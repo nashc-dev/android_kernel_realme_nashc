@@ -31,11 +31,11 @@
 int register_lcdinfo_notifier(struct notifier_block *nb);
 int unregister_lcdinfo_notifier(struct notifier_block *nb);
 
-__attribute__((weak)) int register_lcdinfo_notifier() {
+__attribute__((weak)) int register_lcdinfo_notifier(struct notifier_block *nb) {
 	return -1;
 }
 
-__attribute__((weak)) int unregister_lcdinfo_notifier() {
+__attribute__((weak)) int unregister_lcdinfo_notifier(struct notifier_block *nb) {
 	return -1;
 }
 
@@ -167,7 +167,7 @@ typedef struct {
     unsigned char       Sensor[256];
 } sensor_config_info_t;
 
-__attribute__((weak)) unsigned int get_project() {
+__attribute__((weak)) unsigned int get_project(void) {
 	return -1;
 }
 
@@ -1450,7 +1450,7 @@ int get_msensor_parameter(int num)
 	return 0;
 }
 
-void  mag_soft_parameter_init()
+void  mag_soft_parameter_init(void)
 {
 	int ret = -1;
 	int index = 0;
@@ -1627,7 +1627,7 @@ static const struct file_operations Sensor_info_fops = {
 	.release = single_release,
 };
 
-static int oplus_sensor_feature_init()
+static int oplus_sensor_feature_init(void)
 {
 	struct proc_dir_entry *p_entry;
 	static struct proc_dir_entry *oplus_sensor = NULL;
