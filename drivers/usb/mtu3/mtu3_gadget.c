@@ -31,6 +31,8 @@ __acquires(mep->mtu->lock)
 		mep->name, req, req->status, req->actual, req->length);
 
 	spin_unlock(&mtu->lock);
+	if (mep->ep.address == 0)
+		usb_gadget_control_complete(&mtu->g, req);
 	usb_gadget_giveback_request(&mep->ep, req);
 	spin_lock(&mtu->lock);
 }
