@@ -26,6 +26,7 @@
 /* #include <soc/oppo/oppo_project.h> */
 #include "ddp_dsi.h"
 #include "fbconfig_kdebug.h"
+#include "../../input/oplus_fp_drivers/include/oplus_fp_common.h"
 /*
  * we will create a sysfs which called /sys/kernel/oppo_display,
  * In that directory, oppo display private api can be called
@@ -104,6 +105,8 @@ int _set_hbm_mode_by_cmdq(unsigned int level);
 int primary_display_set_hbm_mode(unsigned int level);
 int disp_lcm_poweron_before_ulps(struct disp_lcm_handle *plcm);
 int disp_lcm_poweroff_after_ulps(struct disp_lcm_handle *plcm);
+
+struct fp_underscreen_info fp_state = {0};
 
 #define dsi_set_cmdq(pdata, queue_size, force_update) \
 		PM_lcm_utils_dsi0.dsi_set_cmdq(pdata, queue_size, force_update)
@@ -1200,6 +1203,12 @@ int primary_display_set_safe_mode(unsigned int level)
 	return ret;
 }
 
+static ssize_t oppo_display_get_fp_state(struct  kobject *kobj,
+                                struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d,%d,%d\n", fp_state.x, fp_state.y, fp_state.touch_state);
+}
+
 static struct kobject *oppo_display_kobj;
 
 static struct kobj_attribute dev_attr_oplus_brightness = __ATTR(oplus_brightness, S_IRUGO|S_IWUSR, oppo_display_get_brightness, oppo_display_set_brightness);
@@ -1218,6 +1227,7 @@ static struct kobj_attribute dev_attr_LCM_CABC = __ATTR(LCM_CABC, S_IRUGO|S_IWUS
 /* #ifdef OPLUS_FEATURE_RAMLESS_AOD */
 static struct kobj_attribute dev_attr_aod_area = __ATTR(aod_area, S_IRUGO|S_IWUSR, NULL, oppo_display_set_aod_area);
 /* #endif */ /* OPLUS_FEATURE_RAMLESS_AOD */
+static struct kobj_attribute dev_attr_fp_state = __ATTR(fp_state, S_IRUGO|S_IWUSR, oppo_display_get_fp_state, NULL);
 
 /*
  * Create a group of attributes so that we can create and destroy them all
@@ -1240,12 +1250,21 @@ static struct attribute *oppo_display_attrs[] = {
 	/* #ifdef OPLUS_FEATURE_RAMLESS_AOD */
 	&dev_attr_aod_area.attr,
 	/* #endif */ /* OPLUS_FEATURE_RAMLESS_AOD */
+	&dev_attr_fp_state.attr,
 	NULL,	/* need to NULL terminate the list of attributes */
 };
 
 static struct attribute_group oppo_display_attr_group = {
 	.attrs = oppo_display_attrs,
 };
+
+static int oppo_opticalfp_irq_handler(struct fp_underscreen_info *tp_info) {
+	fp_state.x = tp_info->x;
+	fp_state.y = tp_info->y;
+	fp_state.touch_state = tp_info->touch_state;
+	sysfs_notify(kernel_kobj, "oplus_display", dev_attr_fp_state.attr.name);
+	return IRQ_HANDLED;
+}
 
 static int __init oppo_display_private_api_init(void)
 {
@@ -1257,10 +1276,14 @@ static int __init oppo_display_private_api_init(void)
 
 	/* Create the files associated with this kobject */
 	retval = sysfs_create_group(oppo_display_kobj, &oppo_display_attr_group);
-	if (retval)
+	if (retval) {
 		kobject_put(oppo_display_kobj);
+		return retval;
+	}
 
-	return retval;
+	opticalfp_irq_handler_register(oppo_opticalfp_irq_handler);
+
+	return 0;
 }
 
 static void __exit oppo_display_private_api_exit(void)
