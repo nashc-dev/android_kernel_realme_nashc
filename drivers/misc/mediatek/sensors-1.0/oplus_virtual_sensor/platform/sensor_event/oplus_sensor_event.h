@@ -7,6 +7,7 @@
 #define _OPLUS_SENSOR_EVENT_H
 #include <linux/poll.h>
 #include <linux/ratelimit.h>
+#include <uapi/oplus/oplus_sensor_event.h>
 
 #define CONTINUE_SENSOR_BUF_SIZE    2048
 #define BIO_SENSOR_BUF_SIZE    0x20000 /* ((512 + 1024 + 1024) * 60) */
@@ -14,25 +15,6 @@
 #define MINOR_NUM_FOR_VIRTUAL_SENSOR 0
 #define MINOR_NUM_MAX 0
 
-enum flushAction {
-    DATA_ACTION,
-    FLUSH_ACTION,
-    BIAS_ACTION,
-    CALI_ACTION,
-    TEMP_ACTION,
-    TEST_ACTION,
-};
-struct oplus_sensor_event {
-    int64_t time_stamp;
-    int8_t handle;
-    int8_t flush_action;
-    int8_t status;
-    int8_t reserved;
-    union {
-        int32_t word[6];
-        int8_t byte[0];
-    };
-} __packed;
 ssize_t oplus_sensor_event_read(unsigned char handle, struct file *file,
     char __user *buffer,
               size_t count, loff_t *ppos);
