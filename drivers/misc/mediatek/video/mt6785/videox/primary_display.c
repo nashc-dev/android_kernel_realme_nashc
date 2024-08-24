@@ -8222,6 +8222,19 @@ out:
 	return ret;
 }
 
+static void primary_display_set_fod_hbm(bool en)
+{
+	if (oplus_display_aod_ramless_support) {
+		if (primary_display_is_video_mode()) {
+			primary_display_set_lcm_hbm(en);
+			primary_display_hbm_wait(en);
+		}
+	} else {
+		primary_display_set_lcm_hbm(en);
+		primary_display_hbm_wait(en);
+	}
+}
+
 int primary_display_frame_cfg(struct disp_frame_cfg_t *cfg)
 {
 	int ret = 0;
@@ -8319,23 +8332,21 @@ int primary_display_frame_cfg(struct disp_frame_cfg_t *cfg)
 
 	#ifdef OPLUS_FEATURE_ONSCREENFINGERPRINT
 	if (oplus_display_fppress_support && !ds_rec_fpd && !doze_rec_fpd) {
-		if (cfg->hbm_en > 0) {
-			fingerprint_layer = true;
-		} else {
-			fingerprint_layer = false;
-		}
 		//#ifndef OPLUS_FEATURE_RAMLESS_AOD
 		//primary_display_set_lcm_hbm(fingerprint_layer);
 		//primary_display_hbm_wait(fingerprint_layer);
 		//#else
-		if (oplus_display_aod_ramless_support) {
-			if (primary_display_is_video_mode()) {
-				primary_display_set_lcm_hbm(fingerprint_layer);
-				primary_display_hbm_wait(fingerprint_layer);
-			}
-		} else {
-			primary_display_set_lcm_hbm(fingerprint_layer);
-			primary_display_hbm_wait(fingerprint_layer);
+		if (fingerprint_layer) {
+			primary_display_set_fod_hbm(1);
+		}
+		/*
+		 * This will only enable HBM mode in the next
+		 * frame config. This ensures that the dimlayer
+		 * is drawn by the time HBM is enabled.
+		 */
+		fingerprint_layer = (cfg->hbm_en > 0);
+		if (!fingerprint_layer) {
+			primary_display_set_fod_hbm(0);
 		}
 		//#endif /* OPLUS_FEATURE_RAMLESS_AOD */
 	}
