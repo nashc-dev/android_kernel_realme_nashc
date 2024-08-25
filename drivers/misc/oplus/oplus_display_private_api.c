@@ -40,6 +40,7 @@
 unsigned long oplus_display_brightness = 0;
 unsigned int oppo_set_brightness = 0;
 extern unsigned int aod_light_mode;
+extern unsigned int real_backlight_level;
 bool oplus_flag_lcd_off = false;
 #ifdef OPLUS_BUG_STABILITY
 bool oplus_display_cabc_cmdq_support; /* if cabc is supported(cmd sent with cmdq handle) */
@@ -124,11 +125,12 @@ void get_panel_state(void) {
 static ssize_t oppo_display_get_brightness(struct  kobject *kobj,
                                 struct kobj_attribute *attr, char *buf)
 {
-	if (oplus_display_brightness > LED_FULL || oplus_display_brightness < LED_OFF) {
-		oplus_display_brightness = LED_OFF;
+	unsigned int brightness = real_backlight_level;
+	if (brightness > LED_FULL || brightness < LED_OFF) {
+		brightness = LED_OFF;
 	}
 	/* printk(KERN_INFO "%s = %lu\n", __func__, oplus_display_brightness); */
-	return sprintf(buf, "%lu\n", oplus_display_brightness);
+	return sprintf(buf, "%d\n", brightness);
 }
 
 static ssize_t oppo_display_set_brightness(struct kobject *kobj,
