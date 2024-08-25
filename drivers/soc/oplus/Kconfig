@@ -1,4 +1,5 @@
 source "drivers/soc/oplus/device_info/Kconfig"
 source "drivers/soc/oplus/mtk_boot/Kconfig"
 source "drivers/soc/oplus/mtk_boot_reason/Kconfig"
+source "drivers/soc/oplus/oplus_custom/Kconfig"
 source "drivers/soc/oplus/oplus_project/Kconfig"
