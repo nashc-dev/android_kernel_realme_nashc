@@ -1245,6 +1245,44 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 	return 1;
 }
 
+#ifdef CONFIG_OPLUS_CHARGER
+int __init early_init_dt_scan_android(unsigned long node, const char *uname,
+				     int depth, void *data)
+{
+	int err;
+	char *str, *cmdline = data;
+
+	pr_info("search \"/firmware/android\", depth: %d, uname: %s\n", depth, uname);
+
+	if (depth != 2 || !cmdline ||
+	    strcmp(uname, "android") != 0)
+		return 0;
+
+	/*
+	 * early_init_dt_scan_chosen() should have already
+	 * set boot_command_line for us.
+	 */
+	str = strstr(cmdline, "androidboot.bootreason=usb");
+	if (!str)
+		/*
+		 * We didn't find androidboot.bootreason=usb in the
+		 * command line.
+		 *
+		 * In this case, just break out.
+		 */
+		return 1;
+
+	/* override mode to be charger. */
+	err = fdt_setprop_string(initial_boot_params, node, "mode", "charger");
+	if (err < 0) {
+		pr_err("Failed to update FDT property: %d.", err);
+	}
+
+	/* break now */
+	return 1;
+}
+#endif
+
 #ifdef CONFIG_HAVE_MEMBLOCK
 #ifndef MIN_MEMBLOCK_ADDR
 #define MIN_MEMBLOCK_ADDR	__pa(PAGE_OFFSET)
@@ -1359,6 +1397,11 @@ void __init early_init_dt_scan_nodes(void)
 
 	/* Setup memory, calling early_init_dt_add_memory_arch */
 	of_scan_flat_dt(early_init_dt_scan_memory, NULL);
+
+#ifdef CONFIG_OPLUS_CHARGER
+	/* Fixup fdt for Android offline charger. */
+	of_scan_flat_dt(early_init_dt_scan_android, boot_command_line);
+#endif
 }
 
 bool __init early_init_dt_scan(void *params)
