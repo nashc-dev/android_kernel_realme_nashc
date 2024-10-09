@@ -391,11 +391,16 @@ int mtu3_config_ep(struct mtu3 *mtu, struct mtu3_ep *mep,
 {
 	void __iomem *mbase = mtu->mac_base;
 	bool gen2cp = mtu->gen2cp;
+	bool use_mult_v2 = mtu->gen2cp;
 	int epnum = mep->epnum;
 	u32 csr0, csr1, csr2;
 	int fifo_sgsz, fifo_addr;
 	int num_pkts;
 
+#if defined(CONFIG_MACH_MT6877) || defined(CONFIG_MACH_MT6853) \
+	|| defined(CONFIG_MACH_MT6873)
+	use_mult_v2 = true;
+#endif
 	fifo_addr = ep_fifo_alloc(mep, mep->maxp);
 	if (fifo_addr < 0) {
 		dev_err(mtu->dev, "alloc ep fifo failed(%d)\n", mep->maxp);
@@ -411,7 +416,7 @@ int mtu3_config_ep(struct mtu3 *mtu, struct mtu3_ep *mep,
 
 		num_pkts = (burst + 1) * (mult + 1) - 1;
 		csr1 = TX_SS_BURST(burst) | TX_SLOT(mep->slot);
-		csr1 |= TX_MAX_PKT(gen2cp, num_pkts) | TX_MULT(gen2cp, mult);
+		csr1 |= TX_MAX_PKT(gen2cp, num_pkts) | TX_MULT(use_mult_v2, mult);
 
 		csr2 = TX_FIFOADDR(fifo_addr >> 4);
 		csr2 |= TX_FIFOSEGSIZE(fifo_sgsz);
