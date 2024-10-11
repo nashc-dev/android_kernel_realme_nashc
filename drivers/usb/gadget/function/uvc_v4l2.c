@@ -495,6 +495,9 @@ uvc_v4l2_streamoff(struct file *file, void *fh, enum v4l2_buf_type type)
 	if (type != video->queue.queue.type)
 		return -EINVAL;
 
+	if (uvc->state != UVC_STATE_STREAMING)
+		return 0;
+
 	ret = uvcg_video_disable(video);
 	if (ret < 0)
 		return ret;
