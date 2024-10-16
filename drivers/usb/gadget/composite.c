@@ -2173,6 +2173,14 @@ try_fun_setup:
 
 check_value:
 	/* respond with data transfer before status phase? */
+	if (ctrl->bRequest != USB_REQ_SET_CONFIGURATION &&
+		ctrl->bRequest != USB_REQ_SET_INTERFACE &&
+		value == USB_GADGET_DELAYED_STATUS) {
+		value = 0;
+		WARN(cdev,
+			"%s: Delayed status not supported for request type %d",
+			__func__, ctrl->bRequest);
+	}
 	if (value >= 0 && value != USB_GADGET_DELAYED_STATUS) {
 		req->length = value;
 		req->context = cdev;
