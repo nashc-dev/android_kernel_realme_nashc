@@ -53,6 +53,8 @@ static char *decode_ep0_state(struct mtu3 *mtu)
 		return "RX-END";
 	case MU3D_EP0_STATE_TX_ENDED:
 		return "TX-ENDED";
+	case MU3D_EP0_STATE_DELAYING:
+		return "DELAYING";
 	default:
 		return "??";
 	}
@@ -150,7 +152,6 @@ static void ep0_stall_set(struct mtu3_ep *mep0, bool set, u32 pktrdy)
 		csr = (csr & ~EP0_SENDSTALL) | EP0_SENTSTALL;
 	mtu3_writel(mtu->mac_base, U3D_EP0CSR, csr);
 
-	mtu->delayed_status = false;
 	mtu->ep0_state = MU3D_EP0_STATE_SETUP;
 
 	dev_dbg(mtu->dev, "ep0: %s STALL, ep0_state: %s\n",
@@ -164,6 +165,7 @@ static void ep0_do_status_stage(struct mtu3 *mtu)
 
 	value = mtu3_readl(mbase, U3D_EP0CSR) & EP0_W1C_BITS;
 	mtu3_writel(mbase, U3D_EP0CSR, value | EP0_SETUPPKTRDY | EP0_DATAEND);
+	mtu->ep0_state = MU3D_EP0_STATE_SETUP;
 }
 
 static int ep0_queue(struct mtu3_ep *mep0, struct mtu3_request *mreq);
@@ -447,8 +449,10 @@ static int handle_standard_request(struct mtu3 *mtu,
 	void __iomem *mbase = mtu->mac_base;
 	enum usb_device_state state = mtu->g.state;
 	int handled = -EINVAL;
+	int ret;
 	u32 dev_conf;
 	u16 value;
+	bool need_delay_continue = le16_to_cpu(setup->wLength) == 0;
 
 	value = le16_to_cpu(setup->wValue);
 
@@ -504,6 +508,15 @@ static int handle_standard_request(struct mtu3 *mtu,
 	default:
 		/* delegate SET_CONFIGURATION, etc */
 		handled = 0;
+	}
+
+	if (handled > 0 && need_delay_continue) {
+		mtu->ep0_req.mep = mtu->ep0;
+		mtu->ep0_req.request.length = 0;
+		mtu->ep0_req.request.complete = ep0_dummy_complete;
+		ret = ep0_queue(mtu->ep0, &mtu->ep0_req);
+		if (ret < 0)
+			handled = ret;
 	}
 
 	return handled;
@@ -642,8 +655,8 @@ static void ep0_read_setup(struct mtu3 *mtu, struct usb_ctrlrequest *setup)
 	if (mreq)
 		ep0_req_giveback(mtu, &mreq->request);
 
-	if (le16_to_cpu(setup->wLength) == 0) {
-		;	/* no data stage, nothing to do */
+	if (le16_to_cpu(setup->wLength) == 0) { /* no data stage */
+		mtu->ep0_state = MU3D_EP0_STATE_DELAYING;
 	} else if (setup->bRequestType & USB_DIR_IN) {
 		mtu3_writel(mtu->mac_base, U3D_EP0CSR,
 			csr | EP0_SETUPPKTRDY | EP0_DPHTX);
@@ -692,24 +705,15 @@ stall:
 finish:
 	if (mtu->test_mode) {
 		;	/* nothing to do */
-	} else if (handled == USB_GADGET_DELAYED_STATUS) {
+	} else if (le16_to_cpu(setup.wLength) == 0) { /* no data stage */
 
 		mreq = next_ep0_request(mtu);
 		if (mreq) {
 			/* already asked us to continue delayed status */
 			ep0_do_status_stage(mtu);
 			ep0_req_giveback(mtu, &mreq->request);
-		} else {
-			/* do delayed STATUS stage till receive ep0_queue */
-			mtu->delayed_status = true;
 		}
-	} else if (le16_to_cpu(setup.wLength) == 0) { /* no data stage */
-
-		ep0_do_status_stage(mtu);
-		/* complete zlp request directly */
-		mreq = next_ep0_request(mtu);
-		if (mreq && !mreq->request.length)
-			ep0_req_giveback(mtu, &mreq->request);
+		/* otherwise do delayed STATUS stage till receive ep0_queue */
 	}
 
 	return 0;
@@ -788,6 +792,7 @@ irqreturn_t mtu3_ep0_isr(struct mtu3 *mtu)
 		break;
 	case MU3D_EP0_STATE_RX_END:
 	case MU3D_EP0_STATE_TX_ENDED:
+	case MU3D_EP0_STATE_DELAYING:
 	default:
 		/* can't happen */
 		ep0_stall_set(mtu->ep0, true, 0);
@@ -829,6 +834,7 @@ static int ep0_queue(struct mtu3_ep *mep, struct mtu3_request *mreq)
 	case MU3D_EP0_STATE_TX:	/* control-IN data */
 	case MU3D_EP0_STATE_RX_END:
 	case MU3D_EP0_STATE_TX_ENDED:
+	case MU3D_EP0_STATE_DELAYING:
 		break;
 	default:
 		dev_err(mtu->dev, "%s, error in ep0 state %s\n", __func__,
@@ -840,13 +846,6 @@ static int ep0_queue(struct mtu3_ep *mep, struct mtu3_request *mreq)
 		return -EBUSY;
 
 	list_add_tail(&mreq->list, &mep->req_list);
-
-	if (mtu->delayed_status) {
-		mtu->delayed_status = false;
-		ep0_do_status_stage(mtu);
-		ep0_req_giveback(mtu, &mreq->request);
-		return 0;
-	}
 
 	/* sequence #1, IN ... start writing the data */
 	if (mtu->ep0_state == MU3D_EP0_STATE_TX)
@@ -863,6 +862,17 @@ static int ep0_queue(struct mtu3_ep *mep, struct mtu3_request *mreq)
 			ep0_req_giveback(mtu, &mreq->request);
 		}
 		return status;
+	}
+
+	/* status stage of setup without data */
+	else if (mtu->ep0_state == MU3D_EP0_STATE_DELAYING) {
+		if (mreq->request.length) {
+			WARN_ON(1);
+			return -EINVAL;
+		}
+		ep0_do_status_stage(mtu);
+		ep0_req_giveback(mtu, &mreq->request);
+		return 0;
 	}
 
 	return 0;
@@ -932,6 +942,9 @@ static int mtu3_ep0_halt(struct usb_ep *ep, int value)
 		break;
 	case MU3D_EP0_STATE_RX_END:
 		ep0_stall_set(mtu->ep0, true, EP0_RXPKTRDY);
+		break;
+	case MU3D_EP0_STATE_DELAYING:
+		ep0_stall_set(mtu->ep0, true, EP0_SETUPPKTRDY);
 		break;
 	default:
 		dev_dbg(mtu->dev, "ep0 can't halt in state %s\n",

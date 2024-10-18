@@ -712,7 +712,6 @@ static void mtu3_state_reset(struct mtu3 *mtu)
 	mtu->may_wakeup = 0;
 	mtu->u1_enable = 0;
 	mtu->u2_enable = 0;
-	mtu->delayed_status = false;
 	mtu->test_mode = false;
 }
 
@@ -784,7 +783,6 @@ int mtu3_gadget_setup(struct mtu3 *mtu)
 	mtu->g.sg_supported = 0;
 	mtu->g.name = MTU3_DRIVER_NAME;
 	mtu->is_active = 0;
-	mtu->delayed_status = false;
 
 	mtu3_gadget_init_eps(mtu);
 
